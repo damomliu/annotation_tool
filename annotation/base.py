@@ -34,7 +34,7 @@ class AppBase(FilePath, metaclass=ABCMeta):
         raise NotImplementedError
     
     @abstractmethod
-    def from_(self, img_path, shapes=None):
+    def from_(self, img_path, shapes):
         raise NotImplementedError
     
     @abstractmethod
