@@ -5,32 +5,22 @@ from xml.dom import minidom
 import codecs
 import cv2
 
-from .base import TXTFile
+from .base import AppBase
 from .image import ImageFile
 from .shape import Rectangle, Point
 
+__version__ = '4.2.7'
 
-class LabelmeJSON(TXTFile):
+class LabelmeJSON(AppBase):
     def __init__(self, filepath, check_exist=True):
         super().__init__(filepath, check_exist=check_exist)
     
-    @property
-    def shape_dict(self):
-        # shape_dict = {'shape_type': ['list','of','shapes]}
-        if '_LabelmeJSON__sh_dict' not in self.__dict__:
-            self.parse()
-        return self.__sh_dict
-
-    @property
-    def shapes(self):
-        return [shape for sh_list in self.shape_dict.values() for shape in sh_list]
-    
     def parse(self):
         with open(self.filepath, 'r') as f:
-            jsdata = json.load(f)
+            self.data = json.load(f)
         
-        self.__sh_dict = {}
-        for sh in jsdata['shapes']:
+        self._sh_dict = {}
+        for sh in self.data['shapes']:
             sh_type = sh.get('shape_type')
             pts = sh.get('points')
             label = sh.get('label')
@@ -47,25 +37,32 @@ class LabelmeJSON(TXTFile):
             newshape.group_id = sh.get('group_id')
             newshape.flags = sh.get('flags')
             
-            if sh_type in self.__sh_dict:
-                self.__sh_dict[sh_type].append(newshape)
+            if sh_type in self._sh_dict:
+                self._sh_dict[sh_type].append(newshape)
             else:
-                self.__sh_dict[sh_type] = [newshape]
+                self._sh_dict[sh_type] = [newshape]
     
-    def to_labelimg(self, img_filepath, dst_xml=None):
-        if dst_xml is None:
-            fname,_ = os.path.splitext(img_filepath)
-            dst_xml = fname + '.xml'
+    def from_(self, img_path, shapes=None, flags=None):
+        img = ImageFile(img_path)
+        if shapes is None:
+            shapes = self._sh_dict
+        shapes = [sh.labelme() for sh in shapes]
         
-        labels, xmins,ymins, xmaxs,ymaxs = [],[],[],[],[]
-        for sh in self.shape_dict['rectangle']:
-            xmins.append(sh.x1)
-            ymins.append(sh.y1)
-            xmaxs.append(sh.x2)
-            ymaxs.append(sh.y2)
-            labels.append(sh.label)
-        
-        xml_generator(img_filepath, dst_xml, labels, xmins, ymins, xmaxs, ymaxs)
+        self.data = dict(
+            version=__version__,
+            flags=flags if flags else {},
+            shapes=shapes,
+            imagePath=img.filename,
+            imageData=img.imageData,
+            imageHeight=img.height,
+            imageWidth=img.width,
+        )
+    
+    def save(self, dst=None):
+        if dst is None:
+            dst = self.filepath
+        with open(self.filepath, 'w') as f:
+            json.dump(self.data, f)
 
 class LabelmePair():
     def __init__(self, img_path, json_path=None, check_exist=True):
@@ -75,9 +72,27 @@ class LabelmePair():
             json_path = fname + '.json'
         self.json = LabelmeJSON(json_path, check_exist)
     
-    def to_labelimg(self, dst_xml=None):
-        self.json.to_labelimg(self.img.filepath, dst_xml)
-
+    def to_labelimg(self, xml_path=None):
+        if xml_path is None:
+            fname,_ = os.path.splitext(self.img.filepath)
+            xml_path = fname + '.xml'
+        
+        labels, xmins,ymins, xmaxs,ymaxs = [],[],[],[],[]
+        for sh in self.shape_dict['rectangle']:
+            xmins.append(sh.x1)
+            ymins.append(sh.y1)
+            xmaxs.append(sh.x2)
+            ymaxs.append(sh.y2)
+            labels.append(sh.label)
+        
+        xml_generator(self.img.filepath, xml_path, labels, xmins, ymins, xmaxs, ymaxs)
+    
+    def to_labelimg_pair(self, xml_path=None):
+        if xml_path is None:
+            fname,_ = os.path.splitext(self.img.filepath)
+            xml_path = fname + '.xml'
+        
+        
 class LabelmePair_(ImageFile, LabelmeJSON):
     def __init__(self, img_path, json_path=None, check_exist=True):
         ImageFile.__init__(self, img_path, check_exist)
@@ -86,7 +101,7 @@ class LabelmePair_(ImageFile, LabelmeJSON):
             json_path = fname + '.json'
         LabelmeJSON.__init__(self, json_path, check_exist)
     
-    def to_labelimg(self, dst_xml=None):
+    def to_labelimg(self, xml_path=None):
         super().to_labelimg()
 
 def xml_generator(file, output_xml, labels, xmin, ymin, xmax, ymax):

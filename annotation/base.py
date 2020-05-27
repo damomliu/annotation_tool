@@ -1,10 +1,11 @@
 import os
 from pathlib import Path
+from abc import ABCMeta, abstractmethod, abstractproperty
 
 __all__ = ['FilePath', 'TXTFile']
 
 class FilePath():
-    def __init__(self, filepath, check_exist):
+    def __init__(self, filepath, check_exist=True):
         self.__filepath = filepath
         self.dirname, self.filename = os.path.split(filepath)
         if check_exist and not os.path.exists(filepath):
@@ -26,3 +27,27 @@ class TXTFile(FilePath):
                 self.lines = f.readlines()
         except IOError:
             print(f'!!Failed!! reading [{self.filepath}]')
+
+class AppBase(FilePath, metaclass=ABCMeta):
+    @abstractmethod
+    def parse(self):
+        raise NotImplementedError
+    
+    @abstractmethod
+    def from_(self, img_path, shapes=None):
+        raise NotImplementedError
+    
+    @abstractmethod
+    def save(self, dst=None):
+        raise NotImplementedError
+    
+    @property
+    def shape_dict(self):
+        # shape_dict = {'shape_type': ['list','of','shapes]}
+        if '_sh_dict' not in self.__dict__:
+            self.parse()
+        return self._sh_dict
+
+    @property
+    def shapes(self):
+        return [shape for sh_list in self.shape_dict.values() for shape in sh_list]
