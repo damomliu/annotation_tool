@@ -27,12 +27,20 @@ class ImageFile(FilePath):
         return imgData
     
     @property
-    def width(self):
+    def w(self):
         return self.im.width
     
     @property
-    def height(self):
+    def h(self):
         return self.im.height
+    
+    @property
+    def c(self):
+        shape = np.array(self.im).shape
+        if len(shape) >= 3:
+            return shape[2]
+        else:
+            return None
     
     @property
     def rgb_array(self):
@@ -52,8 +60,8 @@ class ImageFile(FilePath):
             shapes=shapes,
             imagePath=self.filename,
             imageData=self.imageData,
-            imageHeight=self.height,
-            imageWidth=self.width,
+            imageHeight=self.h,
+            imageWidth=self.w,
         )
         
         if dst is None:
