@@ -8,8 +8,12 @@ class FilePath():
     def __init__(self, filepath, check_exist=True):
         self.__filepath = filepath
         self.dirname, self.filename = os.path.split(filepath)
+        self.fname, self.ext = os.path.splitext(self.filename)
+        self.foldername = os.path.basename(self.dirname)
         if check_exist and not os.path.exists(filepath):
             print(f'!!Warning!! filepath not exists [{filepath}]')
+            if os.path.isdir(filepath):
+                print(f'!!Warning!! is a directory [{filepath}]')
     
     @property
     def filepath(self):
