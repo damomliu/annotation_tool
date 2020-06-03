@@ -42,8 +42,10 @@ class LabelmeJSON(AppBase):
             else:
                 self._sh_dict[sh_type] = [newshape]
     
-    def from_(self, img_path, shapes, flags=None):
+    def from_(self, img_path, shapes=None, flags=None):
         img = ImageFile(img_path)
+        if shapes is None: shapes = self.shapes
+        
         _shapes = [sh.labelme() for sh in shapes]
         
         self.data = dict(
@@ -52,12 +54,12 @@ class LabelmeJSON(AppBase):
             shapes=_shapes,
             imagePath=img.filename,
             imageData=img.imageData,
-            imageHeight=img.height,
-            imageWidth=img.width,
+            imageHeight=img.h,
+            imageWidth=img.w,
         )
     
     def save(self, dst=None):
         if dst is None:
             dst = self.filepath
-        with open(self.filepath, 'w') as f:
+        with open(dst, 'w') as f:
             json.dump(self.data, f)

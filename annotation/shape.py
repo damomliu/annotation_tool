@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+import xml.etree.cElementTree as ET
 
 class Shape(metaclass=ABCMeta):
     def __init__(self, label, *pts):
@@ -77,6 +78,19 @@ class Rectangle(Shape):
         json['shape_type'] = 'rectangle'
         json['points'] = [[self.x1,self.y1], [self.x2,self.y2]]
         return json
+    
+    def labelimg(self, **kwargs):
+        obj = ET.Element('object')
+        ET.SubElement(obj, 'name').text = str(self.label)
+        for k,v in kwargs.items():
+            ET.SubElement(obj, str(k)).text = str(v)
+        
+        bndbox = ET.SubElement(obj, 'bndbox')
+        ET.SubElement(bndbox, 'xmin').text = str(self.x1)
+        ET.SubElement(bndbox, 'ymin').text = str(self.y1)
+        ET.SubElement(bndbox, 'xmax').text = str(self.x2)
+        ET.SubElement(bndbox, 'ymax').text = str(self.y2)
+        return obj
     
     def iou(self, rectangle):
         assert isinstance(rectangle, Rectangle)
