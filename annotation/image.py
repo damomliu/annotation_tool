@@ -4,7 +4,7 @@ import json
 import os
 
 import numpy as np
-import PIL.Image
+# import PIL.Image
 import cv2
 
 from .base import FilePath
@@ -12,14 +12,29 @@ from .array import Array
 
 class ImageFile(FilePath):
     def __init__(self, filepath, check_exist=True):
-        FilePath.__init__(self, filepath, check_exist)
-        try:
-            self.im = PIL.Image.open(filepath)
-        except IOError:
-            print(f'!!Failed!! reading [{filepath}]')
+        super().__init__(filepath, check_exist=check_exist)
+        # FilePath.__init__(self, filepath, check_exist)
+        # try:
+        #     self.im = PIL.Image.open(filepath)
+        # except IOError:
+        #     print(f'!!Failed!! reading [{filepath}]')
     
-    def __str__(self):
-        return self.filepath
+    # def __str__(self):
+    #     return self.filepath
+    
+    def read(self):
+        self.img = Image(from_file=self.filepath)
+    
+    def __read(self):
+        if 'img' not in self.__dict__: self.read()
+    
+    @property
+    def im(self):
+        """
+            return a PIL.Image.Image object
+        """
+        self.__read()
+        return self.img.PIL_im
     
     @property
     def imageData(self):
@@ -30,28 +45,41 @@ class ImageFile(FilePath):
     
     @property
     def w(self):
-        return self.im.width
+        self.__read()
+        return self.img.w
     
     @property
     def h(self):
-        return self.im.height
+        self.__read()
+        return self.img.h
     
     @property
     def c(self):
-        shape = np.array(self.im).shape
-        if len(shape) >= 3:
-            return shape[2]
-        else:
-            return None
+        self.__read()
+        return self.img.c
+        # shape = np.array(self.im).shape
+        # if len(shape) >= 3:
+        #     return shape[2]
+        # else:
+        #     return None
     
     @property
-    def rgb_array(self):
-        return np.array(self.im)
+    def shape(self):
+        self.__read()
+        return self.img.shape
     
     @property
-    def bgr_array(self):
-        array = np.array(self.im)
-        return array[:,:,::-1]
+    def rgb(self):
+        self.__read()
+        return self.img.cvt_color('rgb').numpy
+        # return np.array(self.im)
+    
+    @property
+    def bgr(self):
+        self.__read()
+        return self.img.cvt_color('bgr').numpy
+        # array = np.array(self.im)
+        # return array[:,:,::-1]
     
     def save_labelme_json(self, shapes=[], dst=None, flags=None):
         __version__ = '4.2.7'
@@ -136,7 +164,7 @@ class Image(Array):
     
     @property
     def PIL_im(self):
-        import PIL
+        import PIL.Image
         rgb = self.cvt_color('rgb', inplace=False)
         rgb.as_format('hwc')
         return PIL.Image.fromarray(rgb.numpy)

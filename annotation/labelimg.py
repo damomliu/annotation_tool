@@ -106,4 +106,4 @@ class LabelImgXMLPair():
         _boxes = []
         for box in self.xml.shape_dict['rectangle']:
             _boxes.append(box.iaa)
-        return BoundingBoxesOnImage(_boxes, shape=self.img.rgb_array.shape)
+        return BoundingBoxesOnImage(_boxes, shape=self.img.shape)
