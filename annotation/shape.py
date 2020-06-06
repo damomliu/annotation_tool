@@ -92,6 +92,11 @@ class Rectangle(Shape):
         ET.SubElement(bndbox, 'ymax').text = str(self.y2)
         return obj
     
+    @property
+    def iaa(self):
+        from imgaug.augmentables.bbs import BoundingBox
+        return BoundingBox(self.x1, self.y1, self.x2, self.y2, self.label)
+    
     def iou(self, rectangle):
         assert isinstance(rectangle, Rectangle)
         
