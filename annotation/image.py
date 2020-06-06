@@ -28,12 +28,20 @@ class ImageFile(FilePath):
         self.__read()
         return self.img.PIL_im
     
-    @property
-    def imageData(self):
+    def __read_imageData(self):
+        print('read imageData')
         with open(self.filepath, 'rb') as f:
             imgData = f.read()
             imgData = base64.b64encode(imgData).decode('utf-8')
-        return imgData
+        self._imageData = imgData
+    
+    @property
+    def imageData(self):
+        if '_imageData' not in self.__dict__:
+            self.__read_imageData()
+            return 'read', self._imageData
+        else:
+            return self._imageData
     
     @property
     def w(self):
@@ -154,12 +162,20 @@ class Image(Array):
         else:
             return None
     
-    @property
-    def PIL_im(self):
+    def __read_im(self):
+        print('read im')
         import PIL.Image
         rgb = self.cvt_color('rgb', inplace=False)
         rgb.as_format('hwc')
-        return PIL.Image.fromarray(rgb.numpy)
+        self._im = PIL.Image.fromarray(rgb.numpy)
+    
+    @property
+    def PIL_im(self):
+        if '_im' not in self.__dict__:
+            self.__read_im()
+            return 'read', self._im
+        else:
+            return self._im
     
     def expand_dim(self, axis=0):
         assert self.n is None, f'self.n = {self.n}'
