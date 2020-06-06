@@ -20,7 +20,7 @@ class LabelImgXML(AppBase):
         self._sh_dict = {'rectangle': self.__rects}
         for obj in root.findall('object'):
             label = obj.find('name').text
-            pts = [int(obj.find('bndbox').find(pt).text) for pt in ['xmin','ymin','xmax','ymax']]
+            pts = [float(obj.find('bndbox').find(pt).text) for pt in ['xmin','ymin','xmax','ymax']]
             rect = Rectangle(label, *pts, format='xyxy')
             # rect.pose = obj.find('pose').text
             # rect.truncated = int(obj.find('truncated').text)
@@ -54,6 +54,36 @@ class LabelImgXML(AppBase):
         
         self.data = annotation
     
+    def from_array(self, rgb, imgpath, shapes, database='unknown', **kwargs):
+        """
+            改寫自 from_()
+            將綁定的 img_path --> imgarray (shape=h,w,c) (color=rgb)
+            以減少檔案讀寫的次數
+        """
+        annotation = ET.Element('annotation')
+    
+        ET.SubElement(annotation, "folder").text = imgpath.split(os.sep)[-2]
+        ET.SubElement(annotation, 'filename').text = os.path.basename(imgpath)
+        ET.SubElement(annotation, 'path').text = imgpath
+        
+        source = ET.SubElement(annotation, "source")
+        ET.SubElement(source, "database").text = database
+        
+        h,w,c = rgb.shape
+        # h,w,c = int(h), int(w), int(c)
+        size = ET.SubElement(annotation, "size")
+        ET.SubElement(size, "width").text = str(w)
+        ET.SubElement(size, "height").text = str(h)
+        ET.SubElement(size, "depth").text = str(c)
+        
+        for k,v in kwargs.items():
+            ET.SubElement(annotation, str(k)).text = str(v)
+        
+        for sh in shapes:
+            annotation.append(sh.labelimg())
+        
+        self.data = annotation
+    
     def save(self, dst=None):
         if dst is None:
             dst = self.filepath
@@ -62,4 +92,18 @@ class LabelImgXML(AppBase):
         _reparsed = minidom.parseString(_rough_string)
         with open(dst, 'w', encoding='utf-8') as f:
             _reparsed.writexml(f, encoding='utf-8', addindent='    ', newl='\n')
-        
+
+
+class LabelImgXMLPair():
+    def __init__(self, img_path, xml_path):
+        self.img = ImageFile(img_path)
+        self.xml = LabelImgXML(xml_path)
+        self.xml.parse()
+    
+    @property
+    def bbs(self):
+        from imgaug.augmentables.bbs import BoundingBoxesOnImage
+        _boxes = []
+        for box in self.xml.shape_dict['rectangle']:
+            _boxes.append(box.iaa)
+        return BoundingBoxesOnImage(_boxes, shape=self.img.rgb_array.shape)
