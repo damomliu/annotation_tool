@@ -13,14 +13,6 @@ from .array import Array
 class ImageFile(FilePath):
     def __init__(self, filepath, check_exist=True):
         super().__init__(filepath, check_exist=check_exist)
-        # FilePath.__init__(self, filepath, check_exist)
-        # try:
-        #     self.im = PIL.Image.open(filepath)
-        # except IOError:
-        #     print(f'!!Failed!! reading [{filepath}]')
-    
-    # def __str__(self):
-    #     return self.filepath
     
     def read(self):
         self.img = Image(from_file=self.filepath)
