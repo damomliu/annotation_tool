@@ -141,7 +141,7 @@ class Image(Array):
         self.preprocessed = preprocessed
     
     def __repr__(self):
-        return f'<obj.Image {self.w}x{self.h}, {self.format}, {self.color}>'
+        return f'<obj.{self.__class__.__name__} {self.w}x{self.h}, {self.format}/{self.color}>'
     
     @property
     def c(self):

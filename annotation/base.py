@@ -16,7 +16,7 @@ class FilePath():
                 print(f'!!Warning!! is a directory [{filepath}]')
     
     def __repr__(self):
-        return f'<{self.__class__.__name__}@{os.path.basename(self.__filepath)}>'
+        return f'<{self.__class__.__name__} @{os.path.basename(self.__filepath)}>'
     
     @property
     def filepath(self):

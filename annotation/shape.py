@@ -47,7 +47,16 @@ class Rectangle(Shape):
             raise ValueError
     
     def __repr__(self):
-        return f'<shape.Rectangle pt1={self.pt1}, pt2={self.pt2}>'
+        clsname = self.__class__.__name__
+        _repr = f'<{clsname}'
+        
+        if self.label:
+            _repr += f' [{self.label}]'
+        else:
+            _repr += f' {self.pt1}-{self.pt2}'
+        
+        _repr += '>'
+        return _repr
 
     @property
     def pt2(self):
@@ -123,7 +132,16 @@ class Point(Shape):
             raise ValueError
     
     def __repr__(self):
-        return f'<shpae.Point {self.pt1}>'
+        clsname = self.__class__.__name__
+        _repr = f'<{clsname}'
+        
+        if self.label:
+            _repr += f' [{self.label}]'
+        else:
+            _repr += f' {self.pt1}'
+        
+        _repr += '>'
+        return _repr
     
     def labelme(self, **kwargs):
         json = super().labelme_common(**kwargs)

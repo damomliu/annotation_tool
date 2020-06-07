@@ -15,7 +15,7 @@ class Array():
             self.numpy = np.array(array)
     
     def __repr__(self):
-        return f'<obj.Array {self.shape}>'
+        return f'<obj.{self.__class__.__name__} {self.shape}>'
     
     def torch(self, device=None):
         """
