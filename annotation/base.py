@@ -55,6 +55,10 @@ class AppBase(FilePath, metaclass=ABCMeta):
             self.parse()
         return self._sh_dict
 
+    def __get_shapes(self):
+        self._shapes = [shape for sh_list in self.shape_dict.values() for shape in sh_list]
+    
     @property
     def shapes(self):
-        return [shape for sh_list in self.shape_dict.values() for shape in sh_list]
+        if '_shapes' not in self.__dict__: self.__get_shapes()
+        return self._shapes
