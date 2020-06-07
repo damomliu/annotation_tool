@@ -7,7 +7,7 @@ import cv2
 
 from .base import AppBase
 from .image import ImageFile
-from .shape import Rectangle, Point
+from .shape import Rectangle, Point, Polygon
 
 __version__ = '4.2.7'
 
@@ -30,9 +30,13 @@ class LabelmeJSON(AppBase):
                                      format='xyxy')
             elif sh_type=='point':
                 newshape = Point(*pts[0], label=label)
+            elif sh_type=='polygon':
+                pts_flat = []
+                for pt in pts:
+                    pts_flat.extend(pt)
+                newshape = Polygon(*pts_flat, label=label)
             else:
-                print(f'!!WARNING!! unknown shape_type in [{self.filepath}]')
-                continue
+                raise TypeError
             
             newshape.group_id = sh.get('group_id')
             newshape.flags = sh.get('flags')
