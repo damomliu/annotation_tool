@@ -79,10 +79,10 @@ class RetinaFaceLine():
             # line = x1,y1  w,h l0(x,y,visible) l1(x,y,v) l2(x,y,v) l3(x,y,v),..., blur \n
             annots = self.annots
             if len(annots)==4:
-                bbox = Rectangle('f', *annots[:4])
+                bbox = Rectangle(*annots[:4], label='f')
                 shapes.append(bbox)
             else:
-                bbox = Rectangle('f', *annots[:4])
+                bbox = Rectangle(*annots[:4], label='f')
                 bbox.blur = annots[-1]
                 shapes.append(bbox)
                 
@@ -91,7 +91,7 @@ class RetinaFaceLine():
                     idx = 4 + 3*n
                     pts = annots[idx:idx+3]
                     label = f'l{n}'
-                    shapes.append(Point(label, *pts))
+                    shapes.append(Point(*pts, label=label))
             
             return shapes
         

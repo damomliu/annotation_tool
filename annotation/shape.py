@@ -2,7 +2,7 @@ from abc import ABCMeta, abstractmethod
 import xml.etree.cElementTree as ET
 
 class Shape(metaclass=ABCMeta):
-    def __init__(self, label, *pts):
+    def __init__(self, *pts, label=None):
         self.label = label
         self.x1 = float(pts[0])
         self.y1 = float(pts[1])
@@ -22,8 +22,8 @@ class Shape(metaclass=ABCMeta):
                 }
 
 class Rectangle(Shape):
-    def __init__(self, label, *pts, format='xywh'):
-        super().__init__(label, *pts)
+    def __init__(self, *pts, format='xywh', label=None):
+        super().__init__(*pts, label=label)
         
         if len(pts) in [4,5]:
             if format=='xywh':
@@ -121,8 +121,8 @@ class Rectangle(Shape):
         return iou
 
 class Point(Shape):
-    def __init__(self, label, *pts):
-        super().__init__(label, *pts)
+    def __init__(self, *pts, label=None):
+        super().__init__(*pts, label=label)
         if len(pts) in [2,3]:
             if len(pts)==3:
                 self.visible = pts[2]
@@ -148,3 +148,37 @@ class Point(Shape):
         json['shape_type'] = 'point'
         json['points'] = [[self.x1,self.y1]]
         return json
+
+class Polygon(Shape):
+    def __init__(self, *pts, label=None):
+        assert (len(pts) +1) %2, 'Polygon must receive even number (2x) of points'
+        super().__init__(*pts, label=label)
+        
+        self.points = []
+        for i in range(len(pts) //2):
+            if label:
+                ptlabel = f'{label}_{i+1}'
+            else:
+                ptlabel = None
+            self.points.append(Point(pts[2*i], pts[2*i +1], label=ptlabel))
+    
+    def __repr__(self):
+        _rep =  f'<Polygon'
+        if self.label:
+            _rep += f' [{self.label}]'
+        _rep += f'*{len(self.points)}pts>'
+        return _rep
+    
+    @property
+    def as_rectangle(self):
+        xs = []
+        ys = []
+        for pt in self.points:
+            xs.append(pt.x1)
+            ys.append(pt.y1)
+        rect_pts = min(xs),min(ys), max(xs),max(ys)
+        return Rectangle(*rect_pts, format='xyxy', label=self.label)
+    
+    def labelme(self, group_id=None, flags={}):
+        raise NotImplementedError
+        return super().labelme(group_id=group_id, flags=flags)
