@@ -21,7 +21,7 @@ class LabelImgXML(AppBase):
         for obj in root.findall('object'):
             label = obj.find('name').text
             pts = [float(obj.find('bndbox').find(pt).text) for pt in ['xmin','ymin','xmax','ymax']]
-            rect = Rectangle(label, *pts, format='xyxy')
+            rect = Rectangle(*pts, format='xyxy', label=label)
             # rect.pose = obj.find('pose').text
             # rect.truncated = int(obj.find('truncated').text)
             # rect.difficult = int(obj.find('difficult').text)

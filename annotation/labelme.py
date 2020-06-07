@@ -25,11 +25,11 @@ class LabelmeJSON(AppBase):
             pts = sh.get('points')
             label = sh.get('label')
             if sh_type=='rectangle':
-                newshape = Rectangle(label,
-                                     *(pts[0] + pts[1]),
+                newshape = Rectangle(*(pts[0] + pts[1]),
+                                     label=label,
                                      format='xyxy')
             elif sh_type=='point':
-                newshape = Point(label, *pts[0])
+                newshape = Point(*pts[0], label=label)
             else:
                 print(f'!!WARNING!! unknown shape_type in [{self.filepath}]')
                 continue
