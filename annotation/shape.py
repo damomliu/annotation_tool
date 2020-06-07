@@ -2,7 +2,7 @@ from abc import ABCMeta, abstractmethod
 import xml.etree.cElementTree as ET
 
 class Shape(metaclass=ABCMeta):
-    def __init__(self, label, *pts):
+    def __init__(self, *pts, label=None):
         self.label = label
         self.x1 = float(pts[0])
         self.y1 = float(pts[1])
@@ -22,8 +22,8 @@ class Shape(metaclass=ABCMeta):
                 }
 
 class Rectangle(Shape):
-    def __init__(self, label, *pts, format='xywh'):
-        super().__init__(label, *pts)
+    def __init__(self, *pts, format='xywh', label=None):
+        super().__init__(*pts, label=label)
         
         if len(pts) in [4,5]:
             if format=='xywh':
@@ -121,8 +121,8 @@ class Rectangle(Shape):
         return iou
 
 class Point(Shape):
-    def __init__(self, label, *pts):
-        super().__init__(label, *pts)
+    def __init__(self, *pts, label=None):
+        super().__init__(*pts, label=label)
         if len(pts) in [2,3]:
             if len(pts)==3:
                 self.visible = pts[2]
