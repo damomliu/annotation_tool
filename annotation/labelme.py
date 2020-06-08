@@ -17,7 +17,7 @@ class LabelmeJSON(AppBase):
         super().__init__(filepath, check_exist=check_exist)
     
     def parse(self):
-        with open(self.filepath, 'r') as f:
+        with open(self.filepath, 'r', encoding="utf8", errors='ignore') as f:
             self.data = json.load(f)
         
         self._sh_dict = {'point':[],
