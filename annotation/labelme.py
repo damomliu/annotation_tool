@@ -19,7 +19,9 @@ class LabelmeJSON(AppBase):
         with open(self.filepath, 'r') as f:
             self.data = json.load(f)
         
-        self._sh_dict = {}
+        self._sh_dict = {'point':[],
+                         'rectangle':[],
+                         'polygon':[]}
         for sh in self.data['shapes']:
             sh_type = sh.get('shape_type')
             pts = sh.get('points')
