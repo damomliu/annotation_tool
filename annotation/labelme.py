@@ -8,6 +8,7 @@ import cv2
 from .base import AppBase
 from .image import ImageFile
 from .shape import Rectangle, Point, Polygon
+from .labelimg import LabelImgXML
 
 __version__ = '4.2.7'
 
@@ -48,6 +49,24 @@ class LabelmeJSON(AppBase):
             else:
                 self._sh_dict[sh_type] = [newshape]
     
+    def __parse(self):
+        if 'data' not in self.__dict__: self.parse()
+    
+    @property
+    def imgpath(self):
+        self.__parse()
+        imgname = self.data.get('imagePath')
+        imgfolder = os.path.dirname(self.filepath)
+        return os.path.join(imgfolder, imgname)
+    
+    def __get_imgfile(self):
+        self.__imgfile = ImageFile(self.imgpath)
+    
+    @property
+    def imgfile(self):
+        if 'imgfile' not in self.__dict__: self.__get_imgfile()
+        return self.__imgfile 
+    
     def from_(self, img_path, shapes=None, flags=None):
         img = ImageFile(img_path)
         if shapes is None: shapes = self.shapes
@@ -69,3 +88,23 @@ class LabelmeJSON(AppBase):
             dst = self.filepath
         with open(dst, 'w') as f:
             json.dump(self.data, f)
+
+    def to_labelImg(self, poly2rect=False, poly2rect_labels=None, xml_path=None):
+        rects = [sh for sh in self.shape_dict['rectangle']]
+        
+        if poly2rect_labels is None:
+            poly2rect_labels = self.labels
+        
+        if poly2rect:
+            for poly in self.shape_dict['polygon']:
+                if poly.label in poly2rect_labels:
+                    rects.append(poly.as_rectangle)
+                else:
+                    print(f'polygon label [{poly.label}] will not be converted, filename = [{self.filepath}]')
+        
+        if xml_path is None:
+            xml_path = self.filepath.replace('.json', '.xml')
+        xml = LabelImgXML(xml_path, check_exist=False)
+        xml.from_(img_path=self.imgpath, shapes=rects)
+        
+        return xml
