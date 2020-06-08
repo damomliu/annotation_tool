@@ -62,3 +62,8 @@ class AppBase(FilePath, metaclass=ABCMeta):
     def shapes(self):
         if '_shapes' not in self.__dict__: self.__get_shapes()
         return self._shapes
+    
+    @property
+    def labels(self):
+        labels = [sh.label for sh in self.shapes]
+        return sorted(list(set(labels)))
