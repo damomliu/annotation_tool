@@ -1,2 +1,60 @@
-# myapi
-self-created objects for multi-purposes
+# annotation
+## 安裝
+- pip
+    ```shell
+    pip install git+https://192.168.0.116:10080/damon/annotation_tool.git
+    ```
+
+- clone
+    ```shell
+    git clone http://192.168.0.116:10080/damon/annotation_tool.git
+    cd annotation_tool
+    cp -R annotation /path/to/your/project/
+    ```
+
+## 使用
+### Labelme .json --> LabelImg .xml
+```python
+from annotation import LabelmeJSON
+json_path = 'example/img320191126_TaipeiRoadNH_night1.json'
+json_ = LabelmeJSON(json_path)
+```
+![image](example/sample_labelme%20.png)
+- 將 Labelme 的 .json 直接轉換成 LabelImg 可以讀的 .xml
+    1. 用 LabelmeJSON.to_labelImg(), 忽略 polygon
+        ```python
+        xml = json_.to_labelImg()
+        xml.save()
+        ```
+        ![image](example/sample_xml1.png)
+
+    2. 用 LabelmeJSON.to_labelImg(), 將所有 polygon 轉換成  rectangle
+        ```python
+        xml = json_.to_labelImg(poly2rect=True)
+        xml.save()
+        ```
+        ![image](example/sample_xml2.png)
+    
+    3. 用 LabelmeJSON.to_labelImg(), 僅將 label 為"p"的 polygon 轉換成  rectangle
+        ```python
+        xml = json_.to_labelImg(poly2rect=True, poly2rect_labels=['p'])
+        xml.save()
+        ```
+        ![image](example/sample_xml3.png)
+
+# API
+## image
+- image.ImageFile()
+- image.Image()
+
+## shape
+- shape.Point()
+- shape.Rectangle()
+- shape.Polygon()
+
+## AppBase
+各種 annotation tool 產生的 annotation 格式
+- labelimg.LabelImgXML()
+- labelme.LabelmeJSON()
+- retinaface.RetinaFaceTXT()
+- retinaface.RetinaFaceLine()
