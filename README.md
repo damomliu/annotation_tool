@@ -2,7 +2,7 @@
 ## 安裝
 - pip
     ```shell
-    pip install git+https://192.168.0.116:10080/damon/annotation_tool.git
+    pip install git+http://192.168.0.116:10080/damon/annotation_tool.git
     ```
 
 - clone
