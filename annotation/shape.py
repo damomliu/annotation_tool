@@ -102,6 +102,18 @@ class Rectangle(Shape):
         return obj
     
     @property
+    def as_polygon(self):
+        """
+            (x1,y1)     (x2,y1)
+            (x1,y2)     (x2,y2)
+        """
+        pts = [self.x1, self.y1]
+        pts.extend([self.x1, self.y2])
+        pts.extend([self.x2, self.y2])
+        pts.extend([self.x2, self.y1])
+        return Polygon(*pts, label=self.label)
+    
+    @property
     def iaa(self):
         from imgaug.augmentables.bbs import BoundingBox
         return BoundingBox(self.x1, self.y1, self.x2, self.y2, self.label)
@@ -150,6 +162,12 @@ class Point(Shape):
         json['shape_type'] = 'point'
         json['points'] = [[self.x1,self.y1]]
         return json
+    
+    @property
+    def iaa(self):
+        from imgaug.augmentables.kps import Keypoint
+        return Keypoint(self.x1, self.y1)
+
 
 class Polygon(Shape):
     def __init__(self, *pts, label=None):
@@ -184,3 +202,9 @@ class Polygon(Shape):
     def labelme(self, group_id=None, flags={}):
         raise NotImplementedError
         return super().labelme(group_id=group_id, flags=flags)
+    
+    @property
+    def iaa(self):
+        from imgaug.augmentables.polys import Polygon as iaaPolygon
+        pts = [(pt.x1,pt.y1) for pt in self.points]
+        return iaaPolygon(pts, self.label)
