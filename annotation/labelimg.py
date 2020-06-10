@@ -2,7 +2,9 @@ import os
 import json
 import xml.etree.cElementTree as ET
 from xml.dom import minidom
+
 import cv2
+from imgaug.augmentables.bbs import BoundingBoxesOnImage
 
 from .base import AppBase
 from .image import ImageFile
@@ -102,7 +104,6 @@ class LabelImgXMLPair():
     
     @property
     def bbs(self):
-        from imgaug.augmentables.bbs import BoundingBoxesOnImage
         _boxes = []
         for box in self.xml.shape_dict['rectangle']:
             _boxes.append(box.iaa)

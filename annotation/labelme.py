@@ -3,7 +3,11 @@ import json
 import xml.etree.cElementTree as ET
 from xml.dom import minidom
 import codecs
+
 import cv2
+from imgaug.augmentables.kps import KeypointsOnImage
+from imgaug.augmentables.bbs import BoundingBoxesOnImage
+from imgaug.augmentables.polys import PolygonsOnImage
 
 from .base import AppBase
 from .image import ImageFile
@@ -121,9 +125,6 @@ class LabelmeJSON(AppBase):
     
     @property
     def iaa(self):
-        from imgaug.augmentables.kps import KeypointsOnImage
-        from imgaug.augmentables.bbs import BoundingBoxesOnImage
-        from imgaug.augmentables.polys import PolygonsOnImage
         
         pts = [pt.iaa for pt in self.shape_dict['point']]
         boxes = [box.iaa for box in self.shape_dict['rectangle']]

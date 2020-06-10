@@ -7,5 +7,6 @@ setup(
     install_requires=[
         'numpy>=1.14.5',
         'opencv-python>=3.4',
+        'imgaug>=4.0'
     ]
 )

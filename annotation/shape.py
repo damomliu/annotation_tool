@@ -1,6 +1,10 @@
 from abc import ABCMeta, abstractmethod
 import xml.etree.cElementTree as ET
 
+from imgaug.augmentables.kps import Keypoint
+from imgaug.augmentables.bbs import BoundingBox
+from imgaug.augmentables.polys import Polygon as iaaPolygon
+
 class Shape(metaclass=ABCMeta):
     def __init__(self, *pts, label=None):
         self.label = label
@@ -115,7 +119,6 @@ class Rectangle(Shape):
     
     @property
     def iaa(self):
-        from imgaug.augmentables.bbs import BoundingBox
         return BoundingBox(self.x1, self.y1, self.x2, self.y2, self.label)
     
     def intersect(self, rectangle):
@@ -165,7 +168,6 @@ class Point(Shape):
     
     @property
     def iaa(self):
-        from imgaug.augmentables.kps import Keypoint
         return Keypoint(self.x1, self.y1)
 
 
@@ -205,6 +207,5 @@ class Polygon(Shape):
     
     @property
     def iaa(self):
-        from imgaug.augmentables.polys import Polygon as iaaPolygon
         pts = [(pt.x1,pt.y1) for pt in self.points]
         return iaaPolygon(pts, self.label)
