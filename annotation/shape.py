@@ -106,16 +106,18 @@ class Rectangle(Shape):
         from imgaug.augmentables.bbs import BoundingBox
         return BoundingBox(self.x1, self.y1, self.x2, self.y2, self.label)
     
-    def iou(self, rectangle):
+    def intersect(self, rectangle):
         assert isinstance(rectangle, Rectangle)
-        
         # https://www.pyimagesearch.com/2016/11/07/intersection-over-union-iou-for-object-detection/
         xA = max(self.x1, rectangle.x1)
         yA = max(self.y1, rectangle.y1)
         xB = min(self.x2, rectangle.x2)
         yB = min(self.y2, rectangle.y2)
-
-        interArea = max(0, xB - xA + 1) * max(0, yB - yA + 1)
+        
+        return Rectangle('intersect', xA,yA, xB,yB, format='xyxy')
+        
+    def iou(self, rectangle):
+        interArea = self.intersect(rectangle).area_grid
         iou = interArea / float(self.area_grid + rectangle.area_grid - interArea)
 
         return iou
