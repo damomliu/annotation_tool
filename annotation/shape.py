@@ -26,7 +26,12 @@ class Shape(metaclass=ABCMeta):
                 }
 
 class Rectangle(Shape):
-    def __init__(self, *pts, format='xywh', label=None):
+    def __init__(self, *pts, format='xywh', label=None, from_iaa=None):
+        assert (pts is not None and from_iaa is None) or (len(pts)==0 and isinstance(from_iaa, BoundingBox))
+        if from_iaa is not None:
+            pts = (from_iaa.x1, from_iaa.y1, from_iaa.x2, from_iaa.y2)
+            format='xyxy'
+            
         super().__init__(*pts, label=label)
         
         if len(pts) in [4,5]:
@@ -138,7 +143,11 @@ class Rectangle(Shape):
         return iou
 
 class Point(Shape):
-    def __init__(self, *pts, label=None):
+    def __init__(self, *pts, label=None, from_iaa=None):
+        assert (pts is not None and from_iaa is None) or (len(pts)==0 and isinstance(from_iaa, Keypoint))
+        if from_iaa is not None:
+            pts = (from_iaa.x1, from_iaa.y1)
+        
         super().__init__(*pts, label=label)
         if len(pts) in [2,3]:
             if len(pts)==3:
@@ -172,7 +181,13 @@ class Point(Shape):
 
 
 class Polygon(Shape):
-    def __init__(self, *pts, label=None):
+    def __init__(self, *pts, label=None, from_iaa=None):
+        assert (pts is not None and from_iaa is None) or (len(pts)==0 and isinstance(from_iaa, iaaPolygon))
+        if from_iaa is not None:
+            pts = []
+            for pt in from_iaa.exterior:
+                pts.extend([pt[0], pt[1]])
+        
         assert (len(pts) +1) %2, 'Polygon must receive even number (2x) of points'
         super().__init__(*pts, label=label)
         
