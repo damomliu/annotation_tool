@@ -97,6 +97,18 @@ class LabelmeJSON(AppBase):
             imageWidth=img.w,
         )
     
+    def from_array(self, rgb, imgpath, shapes, flags=None):
+        _shapes = [sh.labelme() for sh in shapes]
+        self.data = dict(
+            version=__version__,
+            flags=flags if flags else {},
+            shapes=_shapes,
+            imagePath=os.path.basename(imgpath),
+            imageData=None,
+            imageHeight=rgb.shape[0],
+            imageWidth=rgb.shape[1],
+        )
+    
     def save(self, dst=None):
         if dst is None:
             dst = self.filepath
