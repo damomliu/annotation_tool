@@ -5,7 +5,16 @@
     pip install git+http://192.168.0.116:10080/damon/annotation_tool.git
     ```
 
-- clone
+- clone & install into your venv
+    ```shell
+    [activate / your / venv]
+    git clone http://192.168.0.116:10080/damon/annotation_tool.git
+    cd annotation_tool
+    
+    python setup.py install
+    ```
+
+- clone & copy to your project
     ```shell
     git clone http://192.168.0.116:10080/damon/annotation_tool.git
     cd annotation_tool
@@ -13,6 +22,38 @@
     ```
 
 ## 使用
+
+### FolderAugmenter : iaa.Augmenter 再封裝 (folder --> folder)
+- class FolderAugmenter(self, src_root, src_type, walk=True):
+  - src_root : folder path
+  - src_type : 'labelme' / 'labelImg'
+  - walk: bool
+
+```python
+import imgaug.augmenters as iaa
+from annotation import FolderAugmenter
+
+faug = FolderAugmenter('srcfolder', src_type="labelme", walk=True)
+
+print(faug.relpaths)  # ['1.json', '2.json', ...]
+print(faug.imgpaths)  # ['1.jpg', '2.jpg', ...]
+```
+- methods:
+  - augment(self, seq, dst_root=None, dst_type=None, prefix=None, postfix=None, overwrite=False):
+    - seq: iaa.augmenter / iaa.seq
+    - dst_root: aug後的圖檔/標記檔路徑，若為 None 則會存在 src_root
+    - prefix/postfix: aug後圖檔/標記檔檔名
+    - dst_type: None / 'labelme' / 'labelImg'
+    - overwrite: bool, 若為 False 則在目標路徑存在時 raise FileExistsError
+    - example: 旋轉30度、並將圖片命名為 'rot30_%' (不儲存標記檔)
+    ```python
+    faug.augment(iaa.Rotate(30), prefix='rot30', overwrite=True)
+    ```
+    - example: 旋轉-30度、並將圖片命名為 'rot_%_n30'、並儲存 labelImg .xml 標記檔
+    ```python
+    faug.augment(iaa.Rotate(-30), prefix='rot', postfix='-30', dst_type='labelImg', overwrite=True))
+    ```
+
 ### Labelme .json --> LabelImg .xml
 ```python
 from annotation import LabelmeJSON
@@ -42,6 +83,7 @@ json_ = LabelmeJSON(json_path)
         ```
         ![image](example/sample_xml3.png)
 
+
 # API
 ## image
 - image.ImageFile()
@@ -56,5 +98,11 @@ json_ = LabelmeJSON(json_path)
 各種 annotation tool 產生的 annotation 格式
 - labelimg.LabelImgXML()
 - labelme.LabelmeJSON()
+  - .to_labelImg(self, poly2rect=False, poly2rect_labels=None, xml_path=None)
+  
 - retinaface.RetinaFaceTXT()
 - retinaface.RetinaFaceLine()
+
+## Augmenter
+- FolderAugmenter()
+  - .augment

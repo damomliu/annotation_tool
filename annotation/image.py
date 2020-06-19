@@ -9,6 +9,7 @@ import cv2
 
 from .base import FilePath
 from .array import Array
+from .shape import Rectangle
 
 class ImageFile(FilePath):
     def __init__(self, filepath, check_exist=True):
@@ -108,7 +109,6 @@ class Image(Array):
         Image().color
         Image().format
         Image().resize
-        Image().preprocessed : bool
         Image().c / Image().w / Image().h / Image().n
     
     Method:
@@ -119,7 +119,7 @@ class Image(Array):
         - Image().crop(rectangle): return copied Image() with cropped array, given by *reactangle*
     """
     def __init__(self, array=[], format=None, color=None, from_file=None,
-                 resize=1, preprocessed=False,
+                 resized=1,
                  copy=False,
                  ):
         assert len(array) or from_file, 'must be initiated from either "array" or "from_file"'
@@ -135,10 +135,10 @@ class Image(Array):
             assert format is not None and color is not None, 'must specify format/color if initiated with an array'
         
         super().__init__(array, copy)
-        self.resize = resize
+        self.resized = resized
         self.format = format
         self.color = color
-        self.preprocessed = preprocessed
+        # self.preprocessed = preprocessed
     
     def __repr__(self):
         return f'<obj.{self.__class__.__name__} {self.w}x{self.h}, {self.format}/{self.color}>'
@@ -177,25 +177,53 @@ class Image(Array):
         else:
             return self._im
     
-    def expand_dim(self, axis=0):
-        assert self.n is None, f'self.n = {self.n}'
+    def __create_normalized(self):
+        if 0<=self.numpy.min() and self.numpy.max()<=1:
+            array = self.numpy
+        else:
+            array = self.numpy / 255.
         
-        self.numpy = np.expand_dims(self.numpy, axis)
-        
-        _f = list(self.format)
-        _f.insert(axis, 'n')
-        self.format = ''.join(_f)
+        self._normalized = Image(array, format=self.format, color=self.color, resized=self.resized)
+    
+    @property
+    def normalized(self):
+        if not hasattr(self, '_normalized'): self.__create_normalized()
+        return self._normalized
     
     def copy(self):
         return Image(array=self.numpy,
-                        resize=self.resize,
+                        resized=self.resized,
                         format=self.format,
                         color=self.color,
-                        preprocessed=self.preprocessed,
                         copy=True,
                         )
     
-    def crop(self, rectangle):
+    def resize(self, newsize, inplace=False):
+        """
+            newsize = 'int' or '(w,h)'
+        """
+        if isinstance(newsize, int):
+            newsize = (newsize,) *2
+        else:
+            newsize = tuple(newsize)
+        if newsize != (self.w, self.h):
+            dst = self if inplace else self.copy()
+            oriColor = dst.color
+            oriFormat = dst.format
+            dst.as_format('hwc', inplace=True)
+            
+            r = (newsize[1]/self.w, newsize[0]/self.h)
+            resized_array = cv2.resize(dst.numpy, newsize)
+            dst = Image(resized_array, format='hwc', color=oriColor, resized=r)
+            dst.as_format(oriFormat, inplace=True)
+            
+            if not inplace: return dst
+        
+        else:
+            if not inplace: return self.copy()
+    
+    def crop(self, rectangle, inplace=False):
+        assert isinstance(rectangle, Rectangle)
         slices = []
         for f in self.format:
             _slc = slice(None, None)
@@ -207,25 +235,34 @@ class Image(Array):
                 _slc = _correct_crop_pts(_slc, upper=self.h)
             slices.append(_slc)
         
-        croparray = self.copy()
-        croparray.numpy = croparray.numpy[slices]
+        dst = self if inplace else self.copy()
+        dst.numpy = dst.numpy[slices]
         
-        return croparray
+        if not inplace: return dst
     
-    def squeeze(self):
-        if 'n' in self.format:
-            self.numpy = np.squeeze(self.numpy, axis=self.format.index('n'))
-            self.format = self.format.replace('n', '')
+    def expand_dim(self, axis=0, inplace=False):
+        dst = self if inplace else self.copy()
+        if dst.n is None:
+            dst.numpy = np.expand_dims(dst.numpy, axis)
+            
+            _f = list(dst.format)
+            _f.insert(axis, 'n')
+            dst.format = ''.join(_f)
         
-        return self
+        if not inplace: return dst
+    
+    def squeeze(self, inplace=False):
+        dst = self if inplace else self.copy()
+        if 'n' in dst.format:
+            dst.numpy = np.squeeze(dst.numpy, axis=dst.format.index('n'))
+            dst.format = dst.format.replace('n', '')
+        
+        if not inplace: return dst
     
     def as_format(self, new_format, inplace=False):
         assert set(self.format)==set(new_format), f'cannot convert from "{self.format}" to "{new_format}"'
         
-        if inplace:
-            dst = self
-        else:
-            dst = self.copy()
+        dst = self if inplace else self.copy()
         
         if new_format==self.format:
             pass
@@ -239,10 +276,7 @@ class Image(Array):
         
     def cvt_color(self, new_color, inplace=False):
         old_color = self.color
-        if inplace:
-            dst = self
-        else:
-            dst = self.copy()
+        dst = self if inplace else self.copy()
         
         if new_color==old_color:
             cvt = None
