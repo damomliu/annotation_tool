@@ -227,6 +227,20 @@ class Polygon(Shape):
             json['points'].append([pt.x1, pt.y1])
         return json
     
+    def labelimg(self, **kwargs):
+        obj = ET.Element('object')
+        ET.SubElement(obj, 'name').text = str(self.label)
+        for k,v in kwargs.items():
+            ET.SubElement(obj, str(k)).text = str(v)
+        
+        bndbox = ET.SubElement(obj, 'bndbox')
+        box = self.as_rectangle
+        ET.SubElement(bndbox, 'xmin').text = str(box.x1)
+        ET.SubElement(bndbox, 'ymin').text = str(box.y1)
+        ET.SubElement(bndbox, 'xmax').text = str(box.x2)
+        ET.SubElement(bndbox, 'ymax').text = str(box.y2)
+        return obj
+    
     @property
     def iaa(self):
         pts = [(pt.x1,pt.y1) for pt in self.points]
