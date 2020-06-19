@@ -56,5 +56,7 @@ json_ = LabelmeJSON(json_path)
 各種 annotation tool 產生的 annotation 格式
 - labelimg.LabelImgXML()
 - labelme.LabelmeJSON()
+  - to_labelImg(self, poly2rect=False, poly2rect_labels=None, xml_path=None)
+  
 - retinaface.RetinaFaceTXT()
 - retinaface.RetinaFaceLine()
