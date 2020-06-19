@@ -5,7 +5,16 @@
     pip install git+http://192.168.0.116:10080/damon/annotation_tool.git
     ```
 
-- clone
+- clone & install into your venv
+    ```shell
+    [activate / your / venv]
+    git clone http://192.168.0.116:10080/damon/annotation_tool.git
+    cd annotation_tool
+    
+    python setup.py install
+    ```
+
+- clone & copy to your project
     ```shell
     git clone http://192.168.0.116:10080/damon/annotation_tool.git
     cd annotation_tool
