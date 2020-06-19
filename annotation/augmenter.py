@@ -27,12 +27,12 @@ class FolderAugmenter():
         if self.walk:
             for root,_,files in os.walk(self.src_root):
                 for f in files:
-                    if os.path.splitext(f)[-1].lower() in ext:
+                    if os.path.splitext(f)[-1].lower() == ext:
                         relpath = os.path.relpath(os.path.join(root, f), self.src_root)
                         filelist.append(relpath)
         else:
             for f in os.listdir(self.src_root):
-                if os.path.splitext(f)[-1].lower()in ext:
+                if os.path.splitext(f)[-1].lower() == ext:
                     filelist.append(f)
         
         self._relpaths = filelist
@@ -41,6 +41,16 @@ class FolderAugmenter():
     def relpaths(self):
         if not hasattr(self, '_relpaths'): self.__get_relpaths()
         return self._relpaths
+    
+    def __get_imgpaths(self):
+        self._imgpaths = []
+        for f in iter(self):
+            self._imgpaths.append(f.imgpath)
+    
+    @property
+    def imgpaths(self):
+        if not hasattr(self, '_imgpaths'): self.__get_imgpaths()
+        return self._imgpaths
     
     def __getitem__(self, i):
         if i >= len(self.relpaths): raise IndexError

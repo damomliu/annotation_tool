@@ -25,6 +25,9 @@ import imgaug.augmenters as iaa
 from annotation import FolderAugmenter
 
 faug = FolderAugmenter('srcfolder', src_type="labelme", walk=True)
+
+print(faug.relpaths)  # ['1.json', '2.json', ...]
+print(faug.imgpaths)  # ['1.jpg', '2.jpg', ...]
 ```
 - methods:
   - augment(self, seq, dst_root=None, dst_type=None, prefix=None, postfix=None, overwrite=False):
