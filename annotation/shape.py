@@ -31,6 +31,7 @@ class Rectangle(Shape):
         if from_iaa is not None:
             pts = (from_iaa.x1, from_iaa.y1, from_iaa.x2, from_iaa.y2)
             format='xyxy'
+            if label is None: label = from_iaa.label
             
         super().__init__(*pts, label=label)
         
@@ -147,6 +148,7 @@ class Point(Shape):
         assert (pts is not None and from_iaa is None) or (len(pts)==0 and isinstance(from_iaa, Keypoint))
         if from_iaa is not None:
             pts = (from_iaa.x1, from_iaa.y1)
+            if label is None: label = from_iaa.label
         
         super().__init__(*pts, label=label)
         if len(pts) in [2,3]:
@@ -187,6 +189,7 @@ class Polygon(Shape):
             pts = []
             for pt in from_iaa.exterior:
                 pts.extend([pt[0], pt[1]])
+            if label is None: label = from_iaa.label
         
         assert (len(pts) +1) %2, 'Polygon must receive even number (2x) of points'
         super().__init__(*pts, label=label)
@@ -216,9 +219,13 @@ class Polygon(Shape):
         rect_pts = min(xs),min(ys), max(xs),max(ys)
         return Rectangle(*rect_pts, format='xyxy', label=self.label)
     
-    def labelme(self, group_id=None, flags={}):
-        raise NotImplementedError
-        return super().labelme(group_id=group_id, flags=flags)
+    def labelme(self, **kwargs):
+        json = super().labelme_common(**kwargs)
+        json['shape_type'] = 'polygon'
+        json['points'] = []
+        for pt in self.points:
+            json['points'].append([pt.x1, pt.y1])
+        return json
     
     @property
     def iaa(self):
