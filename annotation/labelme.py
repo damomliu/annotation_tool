@@ -3,7 +3,11 @@ import json
 import xml.etree.cElementTree as ET
 from xml.dom import minidom
 import codecs
+
 import cv2
+from imgaug.augmentables.kps import KeypointsOnImage
+from imgaug.augmentables.bbs import BoundingBoxesOnImage
+from imgaug.augmentables.polys import PolygonsOnImage
 
 from .base import AppBase
 from .image import ImageFile
@@ -59,12 +63,22 @@ class LabelmeJSON(AppBase):
         imgfolder = os.path.dirname(self.filepath)
         return os.path.join(imgfolder, imgname)
     
+    @property
+    def imgw(self):
+        self.__parse()
+        return self.data.get('imageWidth')
+    
+    @property
+    def imgh(self):
+        self.__parse()
+        return self.data.get('imageHeight')
+    
     def __get_imgfile(self):
         self.__imgfile = ImageFile(self.imgpath)
     
     @property
     def imgfile(self):
-        if 'imgfile' not in self.__dict__: self.__get_imgfile()
+        if f'_{self.__class__.__name__}__imgfile' not in self.__dict__: self.__get_imgfile()
         return self.__imgfile 
     
     def from_(self, img_path, shapes=None, flags=None):
@@ -81,6 +95,18 @@ class LabelmeJSON(AppBase):
             imageData=img.imageData,
             imageHeight=img.h,
             imageWidth=img.w,
+        )
+    
+    def from_array(self, rgb, imgpath, shapes, flags=None):
+        _shapes = [sh.labelme() for sh in shapes]
+        self.data = dict(
+            version=__version__,
+            flags=flags if flags else {},
+            shapes=_shapes,
+            imagePath=os.path.basename(imgpath),
+            imageData=None,
+            imageHeight=rgb.shape[0],
+            imageWidth=rgb.shape[1],
         )
     
     def save(self, dst=None):
@@ -108,3 +134,20 @@ class LabelmeJSON(AppBase):
         xml.from_(img_path=self.imgpath, shapes=rects)
         
         return xml
+    
+    @property
+    def iaa(self):
+        
+        pts = [pt.iaa for pt in self.shape_dict['point']]
+        boxes = [box.iaa for box in self.shape_dict['rectangle']]
+        polys = [poly.iaa for poly in self.shape_dict['polygon']]
+        
+        imgshape = (self.imgh, self.imgw)
+        shapes_on_image = {
+            'keypoints': KeypointsOnImage(pts, imgshape),
+            'bounding_boxes': BoundingBoxesOnImage(boxes, imgshape),
+            'polygons': PolygonsOnImage(polys, imgshape),
+        }
+        
+        return shapes_on_image
+    

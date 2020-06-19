@@ -9,6 +9,7 @@ import cv2
 
 from .base import FilePath
 from .array import Array
+from .shape import Rectangle
 
 class ImageFile(FilePath):
     def __init__(self, filepath, check_exist=True):

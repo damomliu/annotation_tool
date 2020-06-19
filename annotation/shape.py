@@ -1,6 +1,10 @@
 from abc import ABCMeta, abstractmethod
 import xml.etree.cElementTree as ET
 
+from imgaug.augmentables.kps import Keypoint
+from imgaug.augmentables.bbs import BoundingBox
+from imgaug.augmentables.polys import Polygon as iaaPolygon
+
 class Shape(metaclass=ABCMeta):
     def __init__(self, *pts, label=None):
         self.label = label
@@ -22,7 +26,13 @@ class Shape(metaclass=ABCMeta):
                 }
 
 class Rectangle(Shape):
-    def __init__(self, *pts, format='xywh', label=None):
+    def __init__(self, *pts, format='xywh', label=None, from_iaa=None):
+        assert (pts is not None and from_iaa is None) or (len(pts)==0 and isinstance(from_iaa, BoundingBox))
+        if from_iaa is not None:
+            pts = (from_iaa.x1, from_iaa.y1, from_iaa.x2, from_iaa.y2)
+            format='xyxy'
+            if label is None: label = from_iaa.label
+            
         super().__init__(*pts, label=label)
         
         if len(pts) in [4,5]:
@@ -102,8 +112,19 @@ class Rectangle(Shape):
         return obj
     
     @property
+    def as_polygon(self):
+        """
+            (x1,y1)     (x2,y1)
+            (x1,y2)     (x2,y2)
+        """
+        pts = [self.x1, self.y1]
+        pts.extend([self.x1, self.y2])
+        pts.extend([self.x2, self.y2])
+        pts.extend([self.x2, self.y1])
+        return Polygon(*pts, label=self.label)
+    
+    @property
     def iaa(self):
-        from imgaug.augmentables.bbs import BoundingBox
         return BoundingBox(self.x1, self.y1, self.x2, self.y2, self.label)
     
     def intersect(self, rectangle):
@@ -123,7 +144,12 @@ class Rectangle(Shape):
         return iou
 
 class Point(Shape):
-    def __init__(self, *pts, label=None):
+    def __init__(self, *pts, label=None, from_iaa=None):
+        assert (pts is not None and from_iaa is None) or (len(pts)==0 and isinstance(from_iaa, Keypoint))
+        if from_iaa is not None:
+            pts = (from_iaa.x1, from_iaa.y1)
+            if label is None: label = from_iaa.label
+        
         super().__init__(*pts, label=label)
         if len(pts) in [2,3]:
             if len(pts)==3:
@@ -150,9 +176,21 @@ class Point(Shape):
         json['shape_type'] = 'point'
         json['points'] = [[self.x1,self.y1]]
         return json
+    
+    @property
+    def iaa(self):
+        return Keypoint(self.x1, self.y1)
+
 
 class Polygon(Shape):
-    def __init__(self, *pts, label=None):
+    def __init__(self, *pts, label=None, from_iaa=None):
+        assert (pts is not None and from_iaa is None) or (len(pts)==0 and isinstance(from_iaa, iaaPolygon))
+        if from_iaa is not None:
+            pts = []
+            for pt in from_iaa.exterior:
+                pts.extend([pt[0], pt[1]])
+            if label is None: label = from_iaa.label
+        
         assert (len(pts) +1) %2, 'Polygon must receive even number (2x) of points'
         super().__init__(*pts, label=label)
         
@@ -181,6 +219,15 @@ class Polygon(Shape):
         rect_pts = min(xs),min(ys), max(xs),max(ys)
         return Rectangle(*rect_pts, format='xyxy', label=self.label)
     
-    def labelme(self, group_id=None, flags={}):
-        raise NotImplementedError
-        return super().labelme(group_id=group_id, flags=flags)
+    def labelme(self, **kwargs):
+        json = super().labelme_common(**kwargs)
+        json['shape_type'] = 'polygon'
+        json['points'] = []
+        for pt in self.points:
+            json['points'].append([pt.x1, pt.y1])
+        return json
+    
+    @property
+    def iaa(self):
+        pts = [(pt.x1,pt.y1) for pt in self.points]
+        return iaaPolygon(pts, self.label)

@@ -2,7 +2,9 @@ import os
 import json
 import xml.etree.cElementTree as ET
 from xml.dom import minidom
+
 import cv2
+from imgaug.augmentables.bbs import BoundingBoxesOnImage
 
 from .base import AppBase
 from .image import ImageFile
@@ -27,6 +29,28 @@ class LabelImgXML(AppBase):
             # rect.difficult = int(obj.find('difficult').text)
             
             self.__rects.append(rect)
+        
+        self.data = root
+    
+    def __parse(self):
+        if 'data' not in self.__dict__: self.parse()
+    
+    @property
+    def imgpath(self):
+        self.__parse()
+        imgname = self.data.find('filename').text
+        dirname = os.path.dirname(self.filepath)
+        return os.path.join(dirname, imgname)
+
+    @property
+    def imgw(self):
+        self.__parse()
+        return int(self.data.find('size').find('width').text)
+
+    @property
+    def imgh(self):
+        self.__parse()
+        return int(self.data.find('size').find('height').text)
     
     def from_(self, img_path, shapes=None, database='unknown', **kwargs):
         img = ImageFile(img_path)
@@ -92,7 +116,15 @@ class LabelImgXML(AppBase):
         _reparsed = minidom.parseString(_rough_string)
         with open(dst, 'w', encoding='utf-8') as f:
             _reparsed.writexml(f, encoding='utf-8', addindent='    ', newl='\n')
-
+    
+    @property
+    def iaa(self):
+        boxes = [box.iaa for box in self.shape_dict['rectangle']]
+        imgshape = (self.imgh, self.imgw)
+        shapes_on_image = {
+            'bounding_boxes': BoundingBoxesOnImage(boxes, imgshape),
+        }
+        return shapes_on_image
 
 class LabelImgXMLPair():
     def __init__(self, img_path, xml_path):
@@ -102,7 +134,6 @@ class LabelImgXMLPair():
     
     @property
     def bbs(self):
-        from imgaug.augmentables.bbs import BoundingBoxesOnImage
         _boxes = []
         for box in self.xml.shape_dict['rectangle']:
             _boxes.append(box.iaa)
