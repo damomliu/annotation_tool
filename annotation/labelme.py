@@ -9,7 +9,7 @@ from imgaug.augmentables.kps import KeypointsOnImage
 from imgaug.augmentables.bbs import BoundingBoxesOnImage
 from imgaug.augmentables.polys import PolygonsOnImage
 
-from .base import AppBase
+from .appbase import AppBase
 from .image import ImageFile
 from .shape import Rectangle, Point, Polygon
 from .labelimg import LabelImgXML
@@ -73,13 +73,13 @@ class LabelmeJSON(AppBase):
         self.__parse()
         return self.data.get('imageHeight')
     
-    def __get_imgfile(self):
-        self.__imgfile = ImageFile(self.imgpath)
+    # def __get_imgfile(self):
+    #     self.__imgfile = ImageFile(self.imgpath)
     
-    @property
-    def imgfile(self):
-        if f'_{self.__class__.__name__}__imgfile' not in self.__dict__: self.__get_imgfile()
-        return self.__imgfile 
+    # @property
+    # def imgfile(self):
+    #     if f'_{self.__class__.__name__}__imgfile' not in self.__dict__: self.__get_imgfile()
+    #     return self.__imgfile 
     
     def from_(self, img_path, shapes=None, flags=None):
         img = ImageFile(img_path)

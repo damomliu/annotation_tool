@@ -6,7 +6,7 @@ from xml.dom import minidom
 import cv2
 from imgaug.augmentables.bbs import BoundingBoxesOnImage
 
-from .base import AppBase
+from .appbase import AppBase
 from .image import ImageFile
 from .shape import Rectangle
 
