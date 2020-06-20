@@ -112,8 +112,8 @@ class LabelmeJSON(AppBase):
     def save(self, dst=None):
         if dst is None:
             dst = self.filepath
-        with open(dst, 'w') as f:
-            json.dump(self.data, f)
+        with open(dst, 'w', encoding='utf8') as f:
+            json.dump(self.data, f, indent=4, ensure_ascii=False)
 
     def to_labelImg(self, poly2rect=False, poly2rect_labels=None, xml_path=None):
         rects = [sh for sh in self.shape_dict['rectangle']]
