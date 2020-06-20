@@ -1,4 +1,5 @@
 import os
+from tqdm import tqdm
 import imageio
 import imgaug.augmenters as iaa
 from imgaug.augmentables.kps import KeypointsOnImage
@@ -65,7 +66,7 @@ class FolderAugmenter():
     
     def augment(self, seq, dst_root=None, dst_type=None, prefix=None, postfix=None, overwrite=False, yolo_labels=None):
         if not dst_root: dst_root = self.src_root
-        for i,f in enumerate(iter(self)):
+        for i,f in enumerate(tqdm(iter(self), total=len(self.relpaths))):
             results = seq.augment(image=f.imgfile.rgb, **f.iaa)
             
             dst_folder,filename = os.path.split(os.path.join(dst_root, self.relpaths[i]))
