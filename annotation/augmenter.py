@@ -5,7 +5,7 @@ from imgaug.augmentables.kps import KeypointsOnImage
 from imgaug.augmentables.bbs import BoundingBoxesOnImage
 from imgaug.augmentables.polys import PolygonsOnImage
 
-from .app import LabelmeJSON, LabelImgXML
+from .app import LabelmeJSON, LabelImgXML, YoloTXT
 from .shape import Point, Rectangle, Polygon
 
 class FolderAugmenter():
@@ -63,7 +63,7 @@ class FolderAugmenter():
         else:
             raise NotImplementedError
     
-    def augment(self, seq, dst_root=None, dst_type=None, prefix=None, postfix=None, overwrite=False):
+    def augment(self, seq, dst_root=None, dst_type=None, prefix=None, postfix=None, overwrite=False, yolo_labels=None):
         if not dst_root: dst_root = self.src_root
         for i,f in enumerate(iter(self)):
             results = seq.augment(image=f.imgfile.rgb, **f.iaa)
@@ -103,7 +103,12 @@ class FolderAugmenter():
                 elif dst_type=='labelImg':
                     annotdst = os.path.join(dst_folder, fname+'.xml')
                     annotfile = LabelImgXML(annotdst, check_exist=False)
+                elif dst_type=='yolo':
+                    annotdst = os.path.join(dst_folder, fname+'.txt')
+                    annotfile = YoloTXT(annotdst, check_exist=False, labels=yolo_labels)
+                else:
+                    NotImplemented
                 
                 if os.path.exists(annotdst) and not overwrite: raise FileExistsError
-                annotfile.from_array(rgb, imgdst, shapes)
+                annotfile.from_array(rgb=rgb, imgpath=imgdst, shapes=shapes)
                 annotfile.save(annotdst)

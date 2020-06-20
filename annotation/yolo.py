@@ -59,7 +59,7 @@ class YoloTXT(AppBase):
     def from_(self, img_path, shapes):
         raise NotImplementedError
     
-    def from_array(self, rgb, shapes):
+    def from_array(self, rgb, shapes, **kwargs):
         """
             rgb : ndarray with shape (w,h,c)
         """
