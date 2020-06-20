@@ -9,7 +9,7 @@ from imgaug.augmentables.kps import KeypointsOnImage
 from imgaug.augmentables.bbs import BoundingBoxesOnImage
 from imgaug.augmentables.polys import PolygonsOnImage
 
-from .base import AppBase
+from .appbase import AppBase
 from .image import ImageFile
 from .shape import Rectangle, Point, Polygon
 from .labelimg import LabelImgXML
@@ -21,7 +21,7 @@ class LabelmeJSON(AppBase):
         super().__init__(filepath, check_exist=check_exist)
     
     def parse(self):
-        with open(self.filepath, 'r') as f:
+        with open(self.filepath, 'r', encoding="utf8", errors='ignore') as f:
             self.data = json.load(f)
         
         self._sh_dict = {'point':[],
@@ -73,13 +73,13 @@ class LabelmeJSON(AppBase):
         self.__parse()
         return self.data.get('imageHeight')
     
-    def __get_imgfile(self):
-        self.__imgfile = ImageFile(self.imgpath)
+    # def __get_imgfile(self):
+    #     self.__imgfile = ImageFile(self.imgpath)
     
-    @property
-    def imgfile(self):
-        if f'_{self.__class__.__name__}__imgfile' not in self.__dict__: self.__get_imgfile()
-        return self.__imgfile 
+    # @property
+    # def imgfile(self):
+    #     if f'_{self.__class__.__name__}__imgfile' not in self.__dict__: self.__get_imgfile()
+    #     return self.__imgfile 
     
     def from_(self, img_path, shapes=None, flags=None):
         img = ImageFile(img_path)
@@ -112,8 +112,8 @@ class LabelmeJSON(AppBase):
     def save(self, dst=None):
         if dst is None:
             dst = self.filepath
-        with open(dst, 'w') as f:
-            json.dump(self.data, f)
+        with open(dst, 'w', encoding='utf8') as f:
+            json.dump(self.data, f, indent=4, ensure_ascii=False)
 
     def to_labelImg(self, poly2rect=False, poly2rect_labels=None, xml_path=None):
         rects = [sh for sh in self.shape_dict['rectangle']]

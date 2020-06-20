@@ -128,7 +128,7 @@ class Rectangle(Shape):
         return BoundingBox(self.x1, self.y1, self.x2, self.y2, self.label)
     
     def intersect(self, rectangle):
-        assert isinstance(rectangle, Rectangle)
+        # assert isinstance(rectangle, Rectangle)
         # https://www.pyimagesearch.com/2016/11/07/intersection-over-union-iou-for-object-detection/
         xA = max(self.x1, rectangle.x1)
         yA = max(self.y1, rectangle.y1)

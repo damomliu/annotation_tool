@@ -34,36 +34,3 @@ class TXTFile(FilePath):
                 self.lines = f.readlines()
         except IOError:
             print(f'!!Failed!! reading [{self.filepath}]')
-
-class AppBase(FilePath, metaclass=ABCMeta):
-    @abstractmethod
-    def parse(self):
-        raise NotImplementedError
-    
-    @abstractmethod
-    def from_(self, img_path, shapes):
-        raise NotImplementedError
-    
-    @abstractmethod
-    def save(self, dst=None):
-        raise NotImplementedError
-    
-    @property
-    def shape_dict(self):
-        # shape_dict = {'shape_type': ['list','of','shapes]}
-        if '_sh_dict' not in self.__dict__:
-            self.parse()
-        return self._sh_dict
-
-    def __get_shapes(self):
-        self._shapes = [shape for sh_list in self.shape_dict.values() for shape in sh_list]
-    
-    @property
-    def shapes(self):
-        if '_shapes' not in self.__dict__: self.__get_shapes()
-        return self._shapes
-    
-    @property
-    def labels(self):
-        labels = [sh.label for sh in self.shapes]
-        return sorted(list(set(labels)))

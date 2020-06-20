@@ -2,10 +2,10 @@
 ## 安裝
 - pip
     ```shell
-    pip install git+http://192.168.0.116:10080/damon/annotation_tool.git
+    pip install -U git+http://192.168.0.116:10080/damon/annotation_tool.git
     ```
 
-- clone
+- clone & copy to your project
     ```shell
     git clone http://192.168.0.116:10080/damon/annotation_tool.git
     cd annotation_tool
