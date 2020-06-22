@@ -135,7 +135,7 @@ class Rectangle(Shape):
         xB = min(self.x2, rectangle.x2)
         yB = min(self.y2, rectangle.y2)
         
-        return Rectangle('intersect', xA,yA, xB,yB, format='xyxy')
+        return Rectangle(xA,yA, xB,yB, format='xyxy', label='intersect')
         
     def iou(self, rectangle):
         interArea = self.intersect(rectangle).area_grid
