@@ -90,6 +90,7 @@ class YoloTXT(AppBase):
         boxes = [box.iaa for box in self.shape_dict['rectangle']]
         imgshape = (self.imgh, self.imgw)
         shapes_on_image = {
+            'image': self.imgfile.rgb,
             'bounding_boxes': BoundingBoxesOnImage(boxes, imgshape),
         }
         return shapes_on_image
