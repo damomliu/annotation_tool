@@ -31,8 +31,13 @@ class LabelmeJSON(AppBase):
             sh_type = sh.get('shape_type')
             pts = sh.get('points')
             label = sh.get('label')
+
+            #### fix Chaos of x y min max
+            k=[]
             if sh_type=='rectangle':
-                newshape = Rectangle(*(pts[0] + pts[1]),
+                k=pts[0] + pts[1]
+                k1=[min(k[0],k[2]),min(k[1],k[3]),max(k[0],k[2]),max(k[1],k[3])]
+                newshape = Rectangle(*(k1),#pts[0] + pts[1]),
                                      label=label,
                                      format='xyxy')
             elif sh_type=='point':
