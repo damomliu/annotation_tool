@@ -149,6 +149,7 @@ class LabelmeJSON(AppBase):
         
         imgshape = (self.imgh, self.imgw)
         shapes_on_image = {
+            'image': self.imgfile.rgb,
             'keypoints': KeypointsOnImage(pts, imgshape),
             'bounding_boxes': BoundingBoxesOnImage(boxes, imgshape),
             'polygons': PolygonsOnImage(polys, imgshape),

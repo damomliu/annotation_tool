@@ -14,6 +14,15 @@
 
 ## 使用
 
+### 讀取 LabelmeJSON 內的資訊 / 重寫
+```python
+from annotation import LabelmeJSON
+jf = LabelmeJSON('path/to/json')
+jf.parse()
+jf.data['imagePath'] = 'new_image_name'
+jf.save()
+```
+
 ### FolderAugmenter : iaa.Augmenter 再封裝 (folder --> folder)
 - class FolderAugmenter(self, src_root, src_type, walk=True):
   - src_root : folder path
@@ -34,7 +43,7 @@ print(faug.imgpaths)  # ['1.jpg', '2.jpg', ...]
     - seq: iaa.augmenter / iaa.seq
     - dst_root: aug後的圖檔/標記檔路徑，若為 None 則會存在 src_root
     - prefix/postfix: aug後圖檔/標記檔檔名
-    - dst_type: None / 'labelme' / 'labelImg'
+    - dst_type: None / 'labelme' / 'labelImg' / 'yolo'
     - overwrite: bool, 若為 False 則在目標路徑存在時 raise FileExistsError
     - example: 旋轉30度、並將圖片命名為 'rot30_%' (不儲存標記檔)
     ```python
