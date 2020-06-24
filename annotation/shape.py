@@ -180,6 +180,11 @@ class Point(Shape):
     @property
     def iaa(self):
         return Keypoint(self.x1, self.y1)
+    
+    def dist(self, point):
+        xd = point.x1 - self.x1
+        yd = point.y1 - self.y1
+        return (xd,yd)
 
 
 class Polygon(Shape):
