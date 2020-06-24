@@ -192,7 +192,7 @@ class FolderAugmenter():
         annresults = results[1:]
         shapes = []
         for annot in annresults:
-            annot.clip_out_of_image()
+            annot = annot.clip_out_of_image()
             if isinstance(annot, KeypointsOnImage):
                 for kp in annot.keypoints:
                     shapes.append(Point(from_iaa=kp))
