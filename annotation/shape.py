@@ -135,7 +135,7 @@ class Rectangle(Shape):
         xB = min(self.x2, rectangle.x2)
         yB = min(self.y2, rectangle.y2)
         
-        return Rectangle('intersect', xA,yA, xB,yB, format='xyxy')
+        return Rectangle(xA,yA, xB,yB, format='xyxy', label='intersect')
         
     def iou(self, rectangle):
         interArea = self.intersect(rectangle).area_grid
@@ -180,6 +180,11 @@ class Point(Shape):
     @property
     def iaa(self):
         return Keypoint(self.x1, self.y1)
+    
+    def dist(self, point):
+        xd = point.x1 - self.x1
+        yd = point.y1 - self.y1
+        return (xd,yd)
 
 
 class Polygon(Shape):

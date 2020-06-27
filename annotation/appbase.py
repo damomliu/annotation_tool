@@ -1,6 +1,7 @@
 from abc import ABCMeta, abstractmethod, abstractproperty
 from .base import FilePath
 from .image import ImageFile
+from .shapes import ShapesOnImage
 
 class AppBase(FilePath, metaclass=ABCMeta):
     @abstractmethod
@@ -41,4 +42,8 @@ class AppBase(FilePath, metaclass=ABCMeta):
     @property
     def imgfile(self):
         if f'_imgfile' not in self.__dict__: self.__get_imgfile()
-        return self._imgfile 
+        return self._imgfile
+    
+    @property
+    def soi(self):
+        return ShapesOnImage(from_iaa=self.iaa)

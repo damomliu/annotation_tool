@@ -25,7 +25,7 @@ class FolderAugmenter():
         self.src_type = src_type
         self.walk = walk
     
-    def __get_relpaths(self):
+    def _get_relpaths(self):
         ext = ANNEXT[self.src_type]
         filelist = []
         if self.walk:
@@ -43,7 +43,7 @@ class FolderAugmenter():
     
     @property
     def relpaths(self):
-        if not hasattr(self, '_relpaths'): self.__get_relpaths()
+        if not hasattr(self, '_relpaths'): self._get_relpaths()
         return self._relpaths
     
     def __get_imgpaths(self):
@@ -171,9 +171,12 @@ class FolderAugmenter():
         if dst_anntype is not None:
             dst_annfolder = os.path.split(os.path.join(dst_annroot, self.relpaths[i]))[0]
             annfname = os.path.join(dst_annfolder, fname)
-            annotfile = self.__make_annot(results, annfname, dst_anntype, imgdst, yolo_labels)
-            if os.path.exists(annotfile.filepath) and not overwrite: raise FileExistsError
-            annotfile.save()
+            
+            if isinstance(dst_anntype, str): dst_anntype = [dst_anntype]
+            for anntype in dst_anntype:
+                annotfile = self.__make_annot(results, annfname, anntype, imgdst, yolo_labels)
+                if os.path.exists(annotfile.filepath) and not overwrite: raise FileExistsError
+                annotfile.save()
     
     
     @staticmethod
@@ -189,7 +192,7 @@ class FolderAugmenter():
         annresults = results[1:]
         shapes = []
         for annot in annresults:
-            annot.clip_out_of_image()
+            annot = annot.clip_out_of_image()
             if isinstance(annot, KeypointsOnImage):
                 for kp in annot.keypoints:
                     shapes.append(Point(from_iaa=kp))

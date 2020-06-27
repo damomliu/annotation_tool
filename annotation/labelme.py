@@ -31,8 +31,13 @@ class LabelmeJSON(AppBase):
             sh_type = sh.get('shape_type')
             pts = sh.get('points')
             label = sh.get('label')
+
+            #### fix Chaos of x y min max
+            k=[]
             if sh_type=='rectangle':
-                newshape = Rectangle(*(pts[0] + pts[1]),
+                k=pts[0] + pts[1]
+                k1=[min(k[0],k[2]),min(k[1],k[3]),max(k[0],k[2]),max(k[1],k[3])]
+                newshape = Rectangle(*(k1),#pts[0] + pts[1]),
                                      label=label,
                                      format='xyxy')
             elif sh_type=='point':
@@ -81,18 +86,19 @@ class LabelmeJSON(AppBase):
     #     if f'_{self.__class__.__name__}__imgfile' not in self.__dict__: self.__get_imgfile()
     #     return self.__imgfile 
     
-    def from_(self, img_path, shapes=None, flags=None):
+    def from_(self, img_path, shapes=None, flags=None, save_imageData=False):
         img = ImageFile(img_path)
         if shapes is None: shapes = self.shapes
         
         _shapes = [sh.labelme() for sh in shapes]
         
+        imgdata = img.imageData if save_imageData else None
         self.data = dict(
             version=__version__,
             flags=flags if flags else {},
             shapes=_shapes,
             imagePath=img.filename,
-            imageData=img.imageData,
+            imageData=imgdata,
             imageHeight=img.h,
             imageWidth=img.w,
         )
