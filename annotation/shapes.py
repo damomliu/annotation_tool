@@ -48,7 +48,7 @@ class ShapesOnImage:
     def __repr__(self):
         rep = '<ShapesOnImage'
         if self.image is not None:
-            rep += f' {self.image.shape[2:]}'
+            rep += f' {self.image.shape[:2]}'
         for k,soi in self.__soi.items():
             if soi.items:
                 rep += f' {k}*{len(soi.items)}'
