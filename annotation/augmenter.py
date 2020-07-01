@@ -7,6 +7,8 @@ from imgaug.augmentables.bbs import BoundingBoxesOnImage
 from imgaug.augmentables.polys import PolygonsOnImage
 from imgaug.augmentables.batches import UnnormalizedBatch
 
+from .base import FilePath
+from .image import ImageFile
 from .app import LabelmeJSON, LabelImgXML, YoloTXT
 from .shape import Point, Rectangle, Polygon
 
@@ -15,41 +17,60 @@ ANNEXT = dict(
     labelimg = '.xml',
     yolo = '.txt',
 )
+IMGEXT = ['.jpg','.jpeg','.png']   
 
 
-class FolderAugmenter():
+class FolderAugmenter(FilePath):
     def __init__(self, src_root, src_type, walk=True):
+        super().__init__(src_root, check_exist=True)
         src_type = src_type.lower()
-        assert src_type in ['labelme', 'labelimg', 'yolo']
+        assert src_type in ['labelme', 'labelimg', 'yolo', 'image']
         self.src_root = src_root
         self.src_type = src_type
         self.walk = walk
     
-    def __get_relpaths(self):
-        ext = ANNEXT[self.src_type]
+    def __repr__(self):
+        return f'<{self.__class__.__name__} @{os.path.basename(self.src_root)}({self.src_type}*{len(self.relpaths)})>'
+    
+    def _get_relpaths(self):
+        if self.src_type == 'image':
+            ext = IMGEXT
+        else:
+            ext = [ANNEXT[self.src_type]]
+        
         filelist = []
         if self.walk:
             for root,_,files in os.walk(self.src_root):
                 for f in files:
-                    if os.path.splitext(f)[-1].lower() == ext:
+                    if os.path.splitext(f)[-1].lower() in ext:
                         relpath = os.path.relpath(os.path.join(root, f), self.src_root)
                         filelist.append(relpath)
         else:
             for f in os.listdir(self.src_root):
-                if os.path.splitext(f)[-1].lower() == ext:
+                if os.path.splitext(f)[-1].lower() in ext:
                     filelist.append(f)
         
         self._relpaths = filelist
     
     @property
     def relpaths(self):
-        if not hasattr(self, '_relpaths'): self.__get_relpaths()
+        if not hasattr(self, '_relpaths'): self._get_relpaths()
         return self._relpaths
     
+    @property
+    def annpaths(self):
+        if self.src_type=='image':
+            return None
+        else:
+            return [os.path.join(self.src_root, rpath) for rpath in self.relpaths]
+    
     def __get_imgpaths(self):
-        self._imgpaths = []
-        for f in iter(self):
-            self._imgpaths.append(f.imgpath)
+        if self.src_type=='image':
+            self._imgpaths = [os.path.join(self.src_root, rpath) for rpath in self.relpaths]
+        else:
+            self._imgpaths = []
+            for f in iter(self):
+                self._imgpaths.append(f.imgpath)
     
     @property
     def imgpaths(self):
@@ -66,6 +87,8 @@ class FolderAugmenter():
             return LabelImgXML(fp)
         elif self.src_type=='yolo':
             return YoloTXT(fp)
+        elif self.src_type=='image':
+            return ImageFile(fp)
         else:
             raise NotImplementedError
     
@@ -171,9 +194,12 @@ class FolderAugmenter():
         if dst_anntype is not None:
             dst_annfolder = os.path.split(os.path.join(dst_annroot, self.relpaths[i]))[0]
             annfname = os.path.join(dst_annfolder, fname)
-            annotfile = self.__make_annot(results, annfname, dst_anntype, imgdst, yolo_labels)
-            if os.path.exists(annotfile.filepath) and not overwrite: raise FileExistsError
-            annotfile.save()
+            
+            if isinstance(dst_anntype, str): dst_anntype = [dst_anntype]
+            for anntype in dst_anntype:
+                annotfile = self.__make_annot(results, annfname, anntype, imgdst, yolo_labels)
+                if os.path.exists(annotfile.filepath) and not overwrite: raise FileExistsError
+                annotfile.save()
     
     
     @staticmethod
@@ -189,7 +215,7 @@ class FolderAugmenter():
         annresults = results[1:]
         shapes = []
         for annot in annresults:
-            annot.clip_out_of_image()
+            annot = annot.clip_out_of_image()
             if isinstance(annot, KeypointsOnImage):
                 for kp in annot.keypoints:
                     shapes.append(Point(from_iaa=kp))

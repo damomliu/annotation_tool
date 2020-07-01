@@ -86,18 +86,19 @@ class LabelmeJSON(AppBase):
     #     if f'_{self.__class__.__name__}__imgfile' not in self.__dict__: self.__get_imgfile()
     #     return self.__imgfile 
     
-    def from_(self, img_path, shapes=None, flags=None):
+    def from_(self, img_path, shapes=None, flags=None, save_imageData=False):
         img = ImageFile(img_path)
         if shapes is None: shapes = self.shapes
         
         _shapes = [sh.labelme() for sh in shapes]
         
+        imgdata = img.imageData if save_imageData else None
         self.data = dict(
             version=__version__,
             flags=flags if flags else {},
             shapes=_shapes,
             imagePath=img.filename,
-            imageData=img.imageData,
+            imageData=imgdata,
             imageHeight=img.h,
             imageWidth=img.w,
         )

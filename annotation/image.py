@@ -16,10 +16,15 @@ class ImageFile(FilePath):
         super().__init__(filepath, check_exist=check_exist)
     
     def read(self):
-        self.img = Image(from_file=self.filepath)
+        self._img = Image(from_file=self.filepath)
     
     def __read(self):
-        if 'img' not in self.__dict__: self.read()
+        if '_img' not in self.__dict__: self.read()
+    
+    @property
+    def img(self):
+        self.__read()
+        return self._img
     
     @property
     def im(self):
@@ -81,6 +86,10 @@ class ImageFile(FilePath):
         return self.img.cvt_color('bgr').numpy
         # array = np.array(self.im)
         # return array[:,:,::-1]
+
+    @property
+    def iaa(self):
+        return {'image': self.rgb}
     
     def save_labelme_json(self, shapes=[], dst=None, flags=None):
         __version__ = '4.2.7'
