@@ -86,6 +86,10 @@ class ImageFile(FilePath):
         return self.img.cvt_color('bgr').numpy
         # array = np.array(self.im)
         # return array[:,:,::-1]
+
+    @property
+    def iaa(self):
+        return {'image': self.rgb}
     
     def save_labelme_json(self, shapes=[], dst=None, flags=None):
         __version__ = '4.2.7'
