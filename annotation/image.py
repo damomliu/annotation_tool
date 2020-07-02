@@ -223,13 +223,34 @@ class Image(Array):
             
             r = (newsize[1]/self.w, newsize[0]/self.h)
             resized_array = cv2.resize(dst.numpy, newsize)
-            dst = Image(resized_array, format='hwc', color=oriColor, resized=r)
+            # dst = Image(resized_array, format='hwc', color=oriColor, resized=r)
+            dst.numpy = resized_array
+            dst.resized = r
             dst.as_format(oriFormat, inplace=True)
             
             if not inplace: return dst
         
         else:
             if not inplace: return self.copy()
+
+    def pad2asp_ratio(self, asp_ratio, inplace=False):
+        dst = self if inplace else self.copy()
+        dst.squeeze(1)
+        dst.as_format('hwc', 1)
+        
+        wh = self.w / self.h
+        if wh > asp_ratio:
+            pad_w = self.w
+            pad_h = int(self.w / asp_ratio)
+        else:
+            pad_h = self.h
+            pad_w = int(self.h * asp_ratio)
+        
+        bg = np.zeros((pad_h,pad_w,self.c), dtype=self.numpy.dtype)
+        bg[:self.h, :self.w, :] = self.numpy
+        dst.numpy = bg
+        
+        if not inplace: return dst        
     
     def crop(self, rectangle, inplace=False):
         assert isinstance(rectangle, Rectangle)
