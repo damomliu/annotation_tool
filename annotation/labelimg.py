@@ -115,7 +115,7 @@ class LabelImgXML(AppBase):
         _rough_string = ET.tostring(self.data, encoding='utf-8')
         _reparsed = minidom.parseString(_rough_string)
         with open(dst, 'w', encoding='utf-8') as f:
-            _reparsed.writexml(f, encoding='utf-8', addindent='    ', newl='\n')
+            _reparsed.writexml(f, encoding='utf-8', addindent='    ', newl='')
     
     @property
     def iaa(self):
