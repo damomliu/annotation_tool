@@ -4,10 +4,12 @@ import imgaug.augmenters as iaa
 
 class SquashRotation:
     def __init__(self,
+                 squash_ratio=None,
                  squash_labels=['c'],
                  rotate=30,
                  order=1, cval=0, mode="constant", **kwargs):
         
+        self.squash_ratio = squash_ratio
         self.squash_labels = squash_labels
         self.rotate = rotate
         self.rotate_kwargs = dict(rotate=rotate, order=order, cval=cval, mode=mode, **kwargs)
@@ -27,12 +29,19 @@ class SquashRotation:
                     dw = (bbox.width - bbox_ori.width) / 2
                     dh = (bbox.height - bbox_ori.height) / 2
                     
-                    dw *= abs(math.sin(math.radians(self.rotate)))
-                    dh *= abs(math.sin(math.radians(self.rotate)))
+                    if self.squash_ratio:
+                        dw *= (1 - self.squash_ratio)
+                        dh *= (1 - self.squash_ratio)
+                    else:
+                        dw *= abs(math.sin(math.radians(self.rotate)))
+                        dh *= abs(math.sin(math.radians(self.rotate)))
+                    
                     bbox.extend_(top=-dh, right=-dw, bottom=-dh, left=-dw)
         return bbox_aug
     
-    def __call__(self):
+    # def __call__(self):
+    @property
+    def iaa(self):
         return Lambda(func_images=self.func_images,
                       func_polygons=self.func_polygons,
                       func_bounding_boxes=self.func_bounding_boxes)
