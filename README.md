@@ -49,6 +49,21 @@ print(faug.imgpaths)  # ['1.jpg', '2.jpg', ...]
                dst_anntype=['labelme','yolo'])
   ```
 
+### LabelImg .xml --> Labelme .json
+```python
+from annotation import LabelImgXML, LabelmeJSON
+xmlpath = 'path/to/xml'
+xml = LabelImgXML(xmlpath)
+xml.parse()
+
+jsonpath = xmlpath.replace('.xml', '.json')
+js = LabelmeJSON(jsonpath, check_exist=False)
+js.from_(xml.imgpath, xml.shapes, save_imageData=False)
+js.save()
+
+```
+
+
 ### Labelme .json --> LabelImg .xml
 ```python
 from annotation import LabelmeJSON
