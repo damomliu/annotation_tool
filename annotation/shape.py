@@ -71,6 +71,18 @@ class Rectangle(Shape):
     @property
     def pt2(self):
         return (int(self.x2), int(self.y2))
+
+    @property
+    def TL(self):
+        x = min(self.pt1[0], self.pt2[0])
+        y = min(self.pt1[1], self.pt2[1])
+        return (x,y)
+    
+    @property
+    def BR(self):
+        x = max(self.pt1[0], self.pt2[0])
+        y = max(self.pt1[1], self.pt2[1])
+        return (x,y)
     
     @property
     def area(self):
@@ -138,10 +150,15 @@ class Rectangle(Shape):
         return Rectangle(xA,yA, xB,yB, format='xyxy', label='intersect')
         
     def iou(self, rectangle):
-        interArea = self.intersect(rectangle).area_grid
-        iou = interArea / float(self.area_grid + rectangle.area_grid - interArea)
+        inter = self.intersect(rectangle)
+        if inter.pt1[0] > inter.pt2[0] or inter.pt1[1] > inter.pt2[1]:
+            return 0
+        
+        else:
+            interArea = inter.area_grid
+            iou = interArea / float(self.area_grid + rectangle.area_grid - interArea)
 
-        return iou
+            return iou
 
 class Point(Shape):
     def __init__(self, *pts, label=None, from_iaa=None):
