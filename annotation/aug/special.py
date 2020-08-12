@@ -39,7 +39,9 @@ class SquashRotation:
                     bbox.extend_(top=-dh, right=-dw, bottom=-dh, left=-dw)
         return bbox_aug
     
-    # def __call__(self):
+    def __call__(self):
+        return self.iaa
+        
     @property
     def iaa(self):
         return Lambda(func_images=self.func_images,
