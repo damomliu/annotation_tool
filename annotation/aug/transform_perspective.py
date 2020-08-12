@@ -76,8 +76,8 @@ class LP_aug():
             "shapes":      shape,
             "lineColor":   [0, 255, 0, 128],
             "fillColor":   [255, 0, 0, 128],
-            "imagePath":   os.path.abspath(image_path),
-            "imageData":   img_str,
+            "imagePath":   os.path.basename(image_path),
+            "imageData":   None,
             "imageHeight": img_shape[0],
             "imageWidth":  img_shape[1]
         }
@@ -396,6 +396,6 @@ sample = 5
 random_s = False
 read_type = ['xml']
 
-input_path = "/home/eddylin/Desktop/plate_generator_special/Fake_special"
+input_path = "/home/alpha/vrs/vreu_data/try_inline_aug/images/debug_squashrotation_xml"
 Create_AugProjectSet(input_path,read_type,Direction1,theta1_range,Direction2,theta2_range,rotation_angle_range,random_s,sample)
 
