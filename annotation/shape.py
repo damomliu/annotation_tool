@@ -148,17 +148,19 @@ class Rectangle(Shape):
         yB = min(self.y2, rectangle.y2)
         
         return Rectangle(xA,yA, xB,yB, format='xyxy', label='intersect')
-        
-    def iou(self, rectangle):
+    
+    def intersect_area(self, rectangle):
         inter = self.intersect(rectangle)
         if inter.pt1[0] > inter.pt2[0] or inter.pt1[1] > inter.pt2[1]:
             return 0
-        
         else:
-            interArea = inter.area_grid
-            iou = interArea / float(self.area_grid + rectangle.area_grid - interArea)
+            return inter.area_grid
+        
+    def iou(self, rectangle):
+        interArea = self.intersect_area(rectangle)
+        iou = interArea / float(self.area_grid + rectangle.area_grid - interArea)
 
-            return iou
+        return iou
 
 class Point(Shape):
     def __init__(self, *pts, label=None, from_iaa=None):
