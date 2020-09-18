@@ -182,11 +182,12 @@ class FolderAugmenter(FilePath):
         
         dst_imgfolder,filename = os.path.split(os.path.join(dst_imgroot, self.relpaths[i]))
         fname = os.path.splitext(filename)[0]
-        imgext = os.path.splitext(self[i].imgfile.filepath)[-1]
+        imgpath = self[i].imgfile.filepath if self.src_type!='image' else self[i].filepath
+        imgext = os.path.splitext(imgpath)[-1]
         if prefix: fname = f'{prefix}_{fname}'
         if postfix: fname = f'{fname}_{postfix}'
         
-        rgb = results[0]
+        rgb = results[0] if self.src_type!='image' else results
         imgdst = os.path.join(dst_imgfolder, fname+imgext)
         if os.path.exists(imgdst) and not overwrite: raise FileExistsError
         self.__save_img(rgb, imgdst)
