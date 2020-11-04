@@ -45,5 +45,13 @@ class AppBase(FilePath, metaclass=ABCMeta):
         return self._imgfile
     
     @property
+    def imgw(self):
+        return self.imgfile.w
+
+    @property
+    def imgh(self):
+        return self.imgfile.h
+    
+    @property
     def soi(self):
         return ShapesOnImage(from_iaa=self.iaa)

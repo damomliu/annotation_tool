@@ -6,28 +6,12 @@ from .image import ImageFile
 from .shape import Rectangle, Polygon
 
 class YoloTXT(AppBase):
-    def __init__(self, filepath, imgpath=None, check_exist=True, labels=None):
+    def __init__(self, filepath, imgpath=None, check_exist=True, all_labels=None):
         super().__init__(filepath, check_exist=check_exist)
-        
-        if imgpath:
-            self.imgpath = imgpath
-            self._imgfile = ImageFile(self.imgpath, check_exist=check_exist)
-        
-        self._labels = labels
-        if self.labels:
-            self.lidx = {l:i for i,l in enumerate(self.labels)}
-    
-    @property
-    def labels(self):
-        return self._labels
-    
-    @property
-    def imgw(self):
-        return self.imgfile.w
-
-    @property
-    def imgh(self):
-        return self.imgfile.h
+        self.imgpath = imgpath
+        self.all_labels = all_labels
+        if self.all_labels:
+            self.lidx = {l:i for i,l in enumerate(self.all_labels)}
     
     def parse(self):
         with open(self.filepath, 'r', encoding="utf8", errors='ignore') as f:
@@ -45,16 +29,13 @@ class YoloTXT(AppBase):
             x1 = xc - 0.5*w
             y1 = yc - 0.5*h
             
-            if self.labels:
-                label = self.labels[lid]
+            if self.all_labels:
+                label = self.all_labels[lid]
             else:
                 label = str(lid)
             
             rect = Rectangle(x1,y1,w,h, format='xywh', label=label)
             self.__rects.append(rect)
-    
-    def __parse(self):
-        if 'data' not in self.__dict__: self.parse()
     
     def from_(self, img_path, shapes):
         raise NotImplementedError

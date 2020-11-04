@@ -3,3 +3,5 @@ from .labelme import LabelmeJSON
 from .yolo import YoloTXT
 from .retinaface import RetinaFaceTXT, RetinaFaceLine
 from .kitti import KittiTXT
+from .jde import JdeTXT
+from .visdrone import VisDET, VisMOT

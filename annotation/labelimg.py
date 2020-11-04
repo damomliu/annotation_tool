@@ -52,6 +52,11 @@ class LabelImgXML(AppBase):
         self.__parse()
         return int(self.data.find('size').find('height').text)
     
+    @property
+    def imgc(self):
+        self.__parse()
+        return int(self.data.find('size').find('depth').text)
+    
     def from_(self, img_path, shapes=None, database='unknown', **kwargs):
         img = ImageFile(img_path)
         if shapes is None: shapes = self.shapes
@@ -115,7 +120,7 @@ class LabelImgXML(AppBase):
         _rough_string = ET.tostring(self.data, encoding='utf-8')
         _reparsed = minidom.parseString(_rough_string)
         with open(dst, 'w', encoding='utf-8') as f:
-            _reparsed.writexml(f, encoding='utf-8', addindent='    ', newl='')
+            _reparsed.writexml(f, encoding='utf-8', addindent='    ', newl='\n')
     
     @property
     def iaa(self):
