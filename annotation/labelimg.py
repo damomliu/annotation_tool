@@ -4,7 +4,6 @@ import xml.etree.cElementTree as ET
 from xml.dom import minidom
 
 import cv2
-from imgaug.augmentables.bbs import BoundingBoxesOnImage
 
 from .appbase import AppBase
 from .image import ImageFile
@@ -79,7 +78,7 @@ class LabelImgXML(AppBase):
             ET.SubElement(annotation, str(k)).text = str(v)
         
         for sh in shapes:
-            annotation.append(sh.labelimg())
+            annotation.append(sh.labelimg(clip_wh=(img.w, img.h)))
         
         self.data = annotation
     
@@ -109,7 +108,7 @@ class LabelImgXML(AppBase):
             ET.SubElement(annotation, str(k)).text = str(v)
         
         for sh in shapes:
-            annotation.append(sh.labelimg())
+            annotation.append(sh.labelimg(clip_wh=(w,h)))
         
         self.data = annotation
     
@@ -122,25 +121,3 @@ class LabelImgXML(AppBase):
         with open(dst, 'w', encoding='utf-8') as f:
             _reparsed.writexml(f, encoding='utf-8', addindent='    ', newl='\n')
     
-    @property
-    def iaa(self):
-        boxes = [box.iaa for box in self.shape_dict['rectangle']]
-        imgshape = (self.imgh, self.imgw)
-        shapes_on_image = {
-            'image': self.imgfile.rgb,
-            'bounding_boxes': BoundingBoxesOnImage(boxes, imgshape),
-        }
-        return shapes_on_image
-
-class LabelImgXMLPair():
-    def __init__(self, img_path, xml_path):
-        self.img = ImageFile(img_path)
-        self.xml = LabelImgXML(xml_path)
-        self.xml.parse()
-    
-    @property
-    def bbs(self):
-        _boxes = []
-        for box in self.xml.shape_dict['rectangle']:
-            _boxes.append(box.iaa)
-        return BoundingBoxesOnImage(_boxes, shape=self.img.shape)

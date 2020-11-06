@@ -1,10 +1,8 @@
 import os
 from tqdm import tqdm
-from imgaug.augmentables.bbs import BoundingBoxesOnImage
 
 from .base import TXTFile
 from .appbase import AppBase
-from .image import ImageFile
 from .shape import Rectangle
 from .labelimg import LabelImgXML
 
@@ -48,16 +46,6 @@ class VisDET(AppBase):
         xf.from_(self.imgpath, self.__rects)
         return xf
     
-    @property
-    def iaa(self):
-        boxes = [box.iaa for box in self.shape_dict['rectangle']]
-        imgshape = (self.imgh, self.imgw)
-        shapes_on_image = {
-            'image': self.imgfile.rgb,
-            'bounding_boxes': BoundingBoxesOnImage(boxes, imgshape),
-        }
-        return shapes_on_image
-
 class VisMOT(TXTFile):
     def __init__(self, filepath, imgfolder, check_exist=True, all_labels=None):
         super().__init__(filepath, check_exist=check_exist)

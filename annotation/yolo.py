@@ -1,8 +1,6 @@
 import cv2
-from imgaug.augmentables.bbs import BoundingBoxesOnImage
 
 from .appbase import AppBase
-from .image import ImageFile
 from .shape import Rectangle, Polygon
 
 class YoloTXT(AppBase):
@@ -66,12 +64,3 @@ class YoloTXT(AppBase):
         with open(dst, 'w', encoding='utf8') as f:
             f.writelines(self.data)
     
-    @property
-    def iaa(self):
-        boxes = [box.iaa for box in self.shape_dict['rectangle']]
-        imgshape = (self.imgh, self.imgw)
-        shapes_on_image = {
-            'image': self.imgfile.rgb,
-            'bounding_boxes': BoundingBoxesOnImage(boxes, imgshape),
-        }
-        return shapes_on_image

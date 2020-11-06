@@ -5,3 +5,4 @@ from .retinaface import RetinaFaceTXT, RetinaFaceLine
 from .kitti import KittiTXT
 from .jde import JdeTXT
 from .visdrone import VisDET, VisMOT
+from .detrac import DetracXML

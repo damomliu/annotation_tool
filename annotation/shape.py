@@ -110,17 +110,26 @@ class Rectangle(Shape):
         json['points'] = [[self.x1,self.y1], [self.x2,self.y2]]
         return json
     
-    def labelimg(self, **kwargs):
+    def labelimg(self, clip_wh=None, **kwargs):
         obj = ET.Element('object')
         ET.SubElement(obj, 'name').text = str(self.label)
         for k,v in kwargs.items():
             ET.SubElement(obj, str(k)).text = str(v)
         
+        if clip_wh is None:
+            x1,y1,x2,y2 = self.x1, self.y1, self.x2, self.y2
+        else:
+            w,h = clip_wh
+            x1 = max(0, self.x1)
+            y1 = max(0, self.y1)
+            x2 = min(w, self.x2)
+            y2 = min(h, self.y2)
+        
         bndbox = ET.SubElement(obj, 'bndbox')
-        ET.SubElement(bndbox, 'xmin').text = str(self.x1)
-        ET.SubElement(bndbox, 'ymin').text = str(self.y1)
-        ET.SubElement(bndbox, 'xmax').text = str(self.x2)
-        ET.SubElement(bndbox, 'ymax').text = str(self.y2)
+        ET.SubElement(bndbox, 'xmin').text = str(x1)
+        ET.SubElement(bndbox, 'ymin').text = str(y1)
+        ET.SubElement(bndbox, 'xmax').text = str(x2)
+        ET.SubElement(bndbox, 'ymax').text = str(y2)
         return obj
     
     @property

@@ -28,11 +28,11 @@ class JdeTXT(AppBase):
             y1 = yc - 0.5*h
             
             if self.all_labels:
-                label = self.all_labels[lid]
+                label = self.all_labels[int(lid)]
             else:
                 label = str(lid)
             
-            rect = Rectangle(x1,y1,w,h, format='xywh', label=identity)
+            rect = Rectangle(x1,y1,w,h, format='xywh', label=label)
             rect.id = identity
             self.__rects.append(rect)
     

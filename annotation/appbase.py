@@ -1,4 +1,6 @@
 from abc import ABCMeta, abstractmethod, abstractproperty
+from imgaug.augmentables.bbs import BoundingBoxesOnImage
+
 from .base import FilePath
 from .image import ImageFile
 from .shapes import ShapesOnImage
@@ -51,6 +53,16 @@ class AppBase(FilePath, metaclass=ABCMeta):
     @property
     def imgh(self):
         return self.imgfile.h
+    
+    @property
+    def iaa(self):
+        boxes = [box.iaa for box in self.shape_dict['rectangle']]
+        imgshape = (self.imgh, self.imgw)
+        shapes_on_image = {
+            'image': self.imgfile.rgb,
+            'bounding_boxes': BoundingBoxesOnImage(boxes, imgshape),
+        }
+        return shapes_on_image
     
     @property
     def soi(self):
