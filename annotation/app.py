@@ -6,3 +6,4 @@ from .kitti import KittiTXT
 from .jde import JdeTXT
 from .visdrone import VisDET, VisMOT
 from .detrac import DetracXML
+from .mot import MotGT, MotDET

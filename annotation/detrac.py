@@ -74,9 +74,9 @@ class DetracXML(AppBase):
             
             self.frame_dict[fr_n] = {'shapes': fr_shapes, 'density': fr_d}
         
-        self.__parse_imgfile()
+        self._parse_imgfile()
         
-    def __parse_imgfile(self):
+    def _parse_imgfile(self):
         for f in glob(os.path.join(self.imgfolder, '*.jpg')):
             fname = os.path.splitext(os.path.basename(f))[0]
             fidx = int(fname.replace('img',''))

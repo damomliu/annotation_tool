@@ -110,3 +110,7 @@ class ShapesOnImage:
         for k,soi in self.dict.items():
             if func in soi.__dir__() and soi.items:
                 soi = soi.__getattribute__(func)(*args, **kwargs)
+
+class ShapesOnNull(ShapesOnImage):
+    def __init__(self, from_iaa=None, shapes=None, image=None):
+        super().__init__(from_iaa=from_iaa, shapes=shapes, image=image)
